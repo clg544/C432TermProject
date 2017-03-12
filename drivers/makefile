@@ -1,5 +1,14 @@
 # This makefile is just for building programs for testing drivers.
 #
+# To upload to the beagle bone via serial, connect the serial adaper to the BBB
+# install xmodem (linux package is usually called lrzsz) and picocom,
+# and launch picocom with picocom -b 115200 /dev/ttyUSB0 --send-cmd "sx -vv".
+# Power on the BBB with the boot mode switch (S2) depressed, picocom
+# should start showing the character 'C' printed continually.
+# Enter C-a C-s and enter the bin file name at the prompt.
+# You may have to send it a few times for it to work
+#
+# TODO default to Ubuntu's tool chain name instead of Arch's
 CROSS_COMPILE = arm-none-eabi-
 CC=$(CROSS_COMPILE)gcc
 OBJCOPY=$(CROSS_COMPILE)objcopy

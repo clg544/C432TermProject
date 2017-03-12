@@ -1,5 +1,6 @@
 #include "gpio.h"
 #include "clock.h"
+#include "common.h"
 
 
 void GPIO_init_port(int port) {
@@ -19,7 +20,7 @@ void GPIO_init_port(int port) {
 void GPIO_set_direction(int port, int dir) {
     switch(port) {
         case 1:
-            *(volatile unsigned int*)(0x4804C134) &= ~(dir);
+            DEREF(GPIO_PORT1 + GPIO_OE) &= ~(dir);
             break;
         default:
             break;
@@ -30,7 +31,7 @@ void GPIO_set_direction(int port, int dir) {
 void GPIO_write_port(int port, int value) {
     switch(port) {
         case 1:
-            *(volatile unsigned int *)(GPIO_PORT1 + GPIO_DATAOUT) = value;
+            DEREF(GPIO_PORT1 + GPIO_DATAOUT) = value;
             break;
         default:
             break;
