@@ -30,6 +30,11 @@ led_test.bin: led_test.o start.o gpio.o clock.o
 	$(LD) start.o gpio.o clock.o led_test.o -T memmap.ld -o led_test.elf
 	$(OBJCOPY) led_test.elf led_test.bin -O binary
 
+timer_test.bin: timer_test.o start.o gpio.o clock.o timer.o
+	$(LD) start.o gpio.o clock.o timer.o timer_test.o -T memmap.ld -o timer_test.elf
+	$(OBJCOPY) timer_test.elf timer_test.bin -O binary
+
+
 clean:
 	rm *.o *.bin *.elf
 

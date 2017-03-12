@@ -10,3 +10,13 @@ void CLOCK_enable_gpio_clock(unsigned int port) {
             break;
     }
 }
+
+void CLOCK_enable_timer_clock(unsigned int timer) {
+    switch(timer) {
+        case 0:
+            DEREF(CM_WKUP + CM_WKUP_TIMER0_CLKCTRL) |= 0x2;
+            break;
+        default:
+            break;
+    }
+}
