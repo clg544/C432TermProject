@@ -8,6 +8,11 @@ void TIMER_init(int timer, unsigned int value, int autoload) {
     TIMER_auto_reload(timer, autoload);
 }
 
+/* The timer counts upward, which means you have to
+ * set the timer to a large number for a short period.
+ * This function makes it more intuitive by making a
+ * small value for the counter take less time.
+ */
 void TIMER_set_counter(int timer, unsigned int value) {
     switch(timer) {
         case 0:
@@ -59,10 +64,16 @@ void TIMER_stop(int timer) {
 int TIMER_finished(int timer) {
     switch(timer) {
         case 0:
-            return DEREF(DMTIMER0 + TCRR) == 0;
+            return (DEREF(DMTIMER0 + TCLR) & 0x1) == 0;
             break;
         default:
             break;
     }
     return -1;
+}
+
+void TIMER_delay(int timer, int value) {
+    TIMER_set_counter(0, value);
+    TIMER_start(0);
+    while(!TIMER_finished(0)){}
 }

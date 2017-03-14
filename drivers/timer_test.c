@@ -1,27 +1,18 @@
 #include "gpio.h"
-/* #include "timer.h" */
+#include "timer.h"
 
 
 int main() {
-    int i;
+    /* int i; */
 
-    /* TIMER_init(0, 0xFFFF0000, 0); */
+    TIMER_init(0, 1000000, 0);
     GPIO_init_port(1);
     GPIO_set_direction(1, 1<<21);
-    GPIO_write_port(1, 1<<27);
-    /* for(i=0;i<1000;i++){} */
-    /* GPIO_write_port(1, 0); */
-    /* for(i=0;i<1000;i++){} */
     while(1) {
-        /* GPIO_write_port(1, 1<<27); */
-        /* TIMER_start(0); */
-        /* while(!TIMER_finished(0)){} */
-        /* for(i=0;i<1000;i++){} */
-        /* GPIO_write_port(1, 0); */
-        /* TIMER_set_counter(0, 0xFFFF0000); */
-        /* TIMER_start(0); */
-        /* for(i=0;i<10000;i++){} */
-        /* while(!TIMER_finished(0)){} */
+        GPIO_write_port(1, 1<<21);
+        TIMER_delay(0, 0xFFFF0000);
+        GPIO_write_port(1, 0);
+        TIMER_delay(0, 0xFFFF0000);
     }
 
     return 0;

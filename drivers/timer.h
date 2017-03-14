@@ -26,4 +26,6 @@ void TIMER_stop(int timer);
 
 int TIMER_finished(int timer);
 
+void TIMER_delay(int timer, int value);
+
 #endif
