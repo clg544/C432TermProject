@@ -10,9 +10,9 @@ int main() {
     GPIO_set_direction(1, 1<<21);
     while(1) {
         GPIO_write_port(1, 1<<21);
-        TIMER_delay(0, 0xFFFF0000);
+        TIMER_delay(0, 0xFFFF);
         GPIO_write_port(1, 0);
-        TIMER_delay(0, 0xFFFF0000);
+        TIMER_delay(0, 0xFFFF);
     }
 
     return 0;

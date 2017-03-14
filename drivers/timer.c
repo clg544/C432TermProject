@@ -16,7 +16,7 @@ void TIMER_init(int timer, unsigned int value, int autoload) {
 void TIMER_set_counter(int timer, unsigned int value) {
     switch(timer) {
         case 0:
-            DEREF(DMTIMER0 + TCRR) = value;
+            DEREF(DMTIMER0 + TCRR) = 0xFFFFFFFF - value;
             break;
         default:
             break;
