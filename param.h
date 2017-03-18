@@ -1,0 +1,1 @@
+/* File to hold Glabal OS paramaters for allocation, and other jobs */
