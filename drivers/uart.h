@@ -2,11 +2,12 @@
 #define __UART__
 
 /* Base addresses section 2.1 */
-#define UART_PORT0 0x44E0_9000
+#define UART_PORT0 0x44E09000
 
 /* Offsets section 19.5.1 */
 #define UART_SYSC 0x54 /* System configuration register */
 #define UART_SYSS 0x58 /* System status register */
+#define LSR_UART  0x14 /* Line status register */
 
 
 /* Performs a software reset on the desired port */

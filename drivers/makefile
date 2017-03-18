@@ -15,7 +15,8 @@ OBJCOPY=$(CROSS_COMPILE)objcopy
 LD=$(CROSS_COMPILE)ld
 AS=$(CROSS_COMPILE)as
 
-CFLAGS=--specs=nosys.specs -Wall --pedantic
+CFLAGS=--specs=nosys.specs -Wall --pedantic -mfpu=neon -mhard-float -mcpu=cortex-a8
+LDFLAGS=
 
 all: led_test.bin
 
@@ -33,6 +34,11 @@ led_test.bin: led_test.o start.o gpio.o clock.o
 timer_test.bin: timer_test.o start.o gpio.o clock.o timer.o
 	$(LD) start.o timer.o gpio.o clock.o timer_test.o -T memmap.ld -o timer_test.elf
 	$(OBJCOPY) timer_test.elf timer_test.bin -O binary
+
+uart_test.bin: uart_test.o start.o gpio.o clock.o uart.o
+	$(LD) $(LDFLAGS) start.o uart.o gpio.o clock.o uart_test.o -T memmap.ld -o uart_test.elf
+	$(OBJCOPY) uart_test.elf uart_test.bin -O binary
+
 
 
 clean:
