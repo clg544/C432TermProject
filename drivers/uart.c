@@ -17,7 +17,7 @@ void UART_soft_reset(unsigned int port) {
 
 void UART_init(unsigned int port) {
     float div = 48000000.0/(16.0*115200);
-    unsigned int intdiv = (unsigned int) div; // this line fails for some reason.
+    unsigned int intdiv = *((unsigned int*)&div);
     GPIO_write_port(1, 1<<22);
     DEREF(CONTROL_MODULE+conf_uart0_rxd) = 1<<4|1<<5;
     DEREF(CONTROL_MODULE+conf_uart0_txd) = 0;
@@ -43,8 +43,8 @@ void UART_init(unsigned int port) {
     DEREF8(UART_PORT0+0x10) = 0x3;
     DEREF8(UART_PORT0+0x08) = 0x7;
     DEREF8(UART_PORT0+0x0C) = ~0x7C;
-    /* DEREF8(UART_PORT0+0x0) = intdiv&0xFF; */
-    /* DEREF8(UART_PORT0+0x04) = (intdiv>>8)&0x3F; */
+    DEREF8(UART_PORT0+0x0) = intdiv&0xFF;
+    DEREF8(UART_PORT0+0x04) = (intdiv>>8)&0x3F;
 
     DEREF8(UART_PORT0+0x0C) = 0x3;
     DEREF8(UART_PORT0+0x20) = 0;
