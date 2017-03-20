@@ -79,3 +79,9 @@ char UART_read_char() {
     while((DEREF8(UART_PORT0+LSR_UART)&0x1) == 0){}
     return DEREF8(UART_PORT0);
 }
+
+void UART_puts(char *s, unsigned int length) {
+    for(int i=0; i<length; i++) {
+        UART_send_char(s[i]);
+    }
+}

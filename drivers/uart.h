@@ -26,5 +26,7 @@ void UART_send_char(char c);
 
 char UART_read_char();
 
+void UART_puts(char *s, unsigned int length);
+
 
 #endif
