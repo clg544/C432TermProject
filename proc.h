@@ -25,7 +25,7 @@ enum task_state{
     ready,      // Task is not currently running but is ready to run.
     running,    // Currently executing.
     waiting,    // Not running, and not able to run; presumably until some blocking operation completes.
-    zombie      // Task has exited and is waiting to have its return code harvested by it's parent
+    zombie      // Task has exited and is waiting to have its return code harvested by it's parent.
 };
 
 struct task_struct{
