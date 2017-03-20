@@ -24,7 +24,7 @@ void UART_init();
 
 void UART_send_char(char c);
 
-char UART_read_char(unsigned int port);
+char UART_read_char();
 
 
 #endif
