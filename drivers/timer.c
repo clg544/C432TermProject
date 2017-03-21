@@ -23,6 +23,12 @@ void TIMER_set_counter(int timer, unsigned int value) {
     }
 }
 
+void TIMER_set_counter_ms(int port, unsigned int miliseconds) {
+    unsigned int value = 31*miliseconds;
+    DEREF(DMTIMER0 + TCRR) = 0xFFFFFFFF - value;
+    /* DEREF(DMTIMER1_1MS + MS_TCRR) = 0xFFFFFFFF - value; */
+}
+
 void TIMER_auto_reload(int timer, int autoload) {
     switch(timer) {
         case 0:
@@ -72,8 +78,8 @@ int TIMER_finished(int timer) {
     return -1;
 }
 
-void TIMER_delay(int timer, int value) {
-    TIMER_set_counter(0, value);
+void TIMER_delay(int port, int value) {
+    TIMER_set_counter_ms(0, value);
     TIMER_start(0);
     while(!TIMER_finished(0)){}
 }
