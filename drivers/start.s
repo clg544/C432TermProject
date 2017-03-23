@@ -26,7 +26,7 @@ GET32:
 	
 /*
 The MIT License (MIT)
-
+CMPT 432
 Copyright (c)  Alexis Marquet
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
