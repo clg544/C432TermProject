@@ -15,7 +15,7 @@ OBJCOPY=$(CROSS_COMPILE)objcopy
 LD=$(CROSS_COMPILE)ld
 AS=$(CROSS_COMPILE)as
 
-CFLAGS=-std=gnu99 -Wall --pedantic -mfpu=neon -mhard-float -mcpu=cortex-a8
+CFLAGS=-std=gnu99 -Wall --pedantic -mfpu=neon -mhard-float -mcpu=cortex-a8 -O0
 LDFLAGS=
 
 all: led_test.bin

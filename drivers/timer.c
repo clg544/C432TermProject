@@ -8,6 +8,7 @@ void TIMER_init(int timer, unsigned int value, int autoload, int irq_enable) {
     TIMER_auto_reload(timer, autoload);
     if(1 == irq_enable) {
         DEREF(DMTIMER0+IRQENABLE_SET) = 0x2;
+        DEREF(INTC + INTC_MIR_CLEAR2) |= 1<<11;
     }
 }
 
@@ -21,15 +22,26 @@ void TIMER_set_counter(int timer, unsigned int value) {
         case 0:
             DEREF(DMTIMER0 + TCRR) = 0xFFFFFFFF - value;
             break;
+        case 2:
+            DEREF(DMTIMER2 + TCRR) = 0xFFFFFFFF - value;
+            break;
         default:
             break;
     }
 }
 
-void TIMER_set_counter_ms(int port, unsigned int miliseconds) {
+void TIMER_set_counter_ms(int timer, unsigned int miliseconds) {
     unsigned int value = 31*miliseconds;
-    DEREF(DMTIMER0 + TCRR) = 0xFFFFFFFF - value;
-    /* DEREF(DMTIMER1_1MS + MS_TCRR) = 0xFFFFFFFF - value; */
+    switch(timer) {
+        case 0:
+            DEREF(DMTIMER0 + TCRR) = 0xFFFFFFFF - value;
+            break;
+        case 2:
+            DEREF(DMTIMER2 + TCRR) = 0xFFFFFFFF - value;
+            break;
+        default:
+            break;
+    }
 }
 
 void TIMER_auto_reload(int timer, int autoload) {
@@ -40,6 +52,11 @@ void TIMER_auto_reload(int timer, int autoload) {
             else
                 DEREF(DMTIMER0 + TCLR) &= ~0x2; /* AR bit 1 */
             break;
+        case 2:
+            if (autoload)
+                DEREF(DMTIMER2 + TCLR) |= 0x2; /* AR bit 1 */
+            else
+                DEREF(DMTIMER2 + TCLR) &= ~0x2; /* AR bit 1 */
         default:
             break;
     }
@@ -51,6 +68,9 @@ void TIMER_start(int timer) {
         case 0:
             DEREF(DMTIMER0 + TCLR) |= 0x1; /* ST bit 0 */
             break;
+        case 2:
+            DEREF(DMTIMER2 + TCLR) |= 0x1; /* ST bit 0 */
+            break;
         default:
             break;
     }
@@ -60,6 +80,9 @@ void TIMER_stop(int timer) {
     switch(timer) {
         case 0:
             DEREF(DMTIMER0 + TCLR) &= ~0x1; /* ST bit 0 */
+            break;
+        case 2:
+            DEREF(DMTIMER2 + TCLR) &= ~0x1; /* ST bit 0 */
             break;
         default:
             break;
@@ -71,19 +94,23 @@ void TIMER_stop(int timer) {
  * is not enabled
  * */
 int TIMER_finished(int timer) {
+    int val = -1;
     switch(timer) {
         case 0:
             return (DEREF(DMTIMER0 + TCLR) & 0x1) == 0;
             break;
+        case 2:
+            return (DEREF(DMTIMER2 + TCLR) & 0x1) == 0;
+            break;
         default:
             break;
     }
-    return -1;
+    return val;
 }
 
-void TIMER_delay(int port, int value) {
-    TIMER_set_counter_ms(0, value);
-    TIMER_start(0);
-    while(!TIMER_finished(0)){}
+void TIMER_delay(int timer, unsigned int value) {
+    TIMER_set_counter_ms(timer, value);
+    TIMER_start(timer);
+    while(!TIMER_finished(timer)){}
 }
 

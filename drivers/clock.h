@@ -12,6 +12,7 @@
 
 /* Offsets section 8.1.12 */
 #define CM_PER_GPIO1_CLKCTRL 0x0AC
+#define CM_PER_TIMER2_CLKCTRL 0x80
 #define CM_WKUP_TIMER0_CLKCTRL 0x10
 
 #define conf_uart0_rxd 0x970

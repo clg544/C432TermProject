@@ -16,6 +16,9 @@ void CLOCK_enable_timer_clock(unsigned int timer) {
         case 0:
             DEREF(CM_WKUP + CM_WKUP_TIMER0_CLKCTRL) |= 0x2;
             break;
+        case 2:
+            DEREF(CKM_PER + CM_PER_TIMER2_CLKCTRL) |= 0x2;
+            break;
         default:
             break;
     }
