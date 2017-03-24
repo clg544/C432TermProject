@@ -35,6 +35,10 @@ timer_test.bin: timer_test.o start.o gpio.o clock.o timer.o
 	$(LD) start.o timer.o gpio.o clock.o timer_test.o -T memmap.ld -o timer_test.elf
 	$(OBJCOPY) timer_test.elf timer_test.bin -O binary
 
+irq_test.bin: irq_test.o start.o gpio.o clock.o timer.o
+	$(LD) start.o timer.o gpio.o clock.o irq_test.o -T memmap.ld -o irq_test.elf
+	$(OBJCOPY) irq_test.elf irq_test.bin -O binary
+
 uart_test.bin: uart_test.o start.o gpio.o clock.o uart.o
 	$(LD) $(LDFLAGS) start.o uart.o gpio.o clock.o uart_test.o -T memmap.ld -o uart_test.elf
 	$(OBJCOPY) uart_test.elf uart_test.bin -O binary

@@ -1,29 +1,39 @@
-
+.equ STACK_SIZE, 256
 _start:
-   mrs r0, cpsr
-   bic r0, r0, #0x1F @ clear mode bits
-   orr r0, r0, #0x13 @ set SVC mode
-   orr r0, r0, #0xC0 @ disable FIQ and IRQ
-   msr cpsr, r0
+    /* setup stack pointer */
+    ldr sp, =0x4030CDFC
+    sub r1, sp, #STACK_SIZE
 
-   @sub sp,sp,#0x1800	@6kB public stack
+    /* save svc */
+    mrs r3, cpsr
 
-	bl main /* Carl Hofmeister 2017, changed _main to main */
+    mov r2, #0x1b @undef
+    msr cpsr_cxsf, r2
+    mov sp, r1
+    sub r1, sp, #STACK_SIZE
 
+    mov r2, #0x12 @irq
+    msr cpsr_cxsf, r2
+    mov sp, r1
+    sub r1, sp, #STACK_SIZE
 
-.loop: b .loop
+    /* return to svc */
+    msr cpsr_cxsf, r3
 
+    mov r3, r0
+    /* zero out bss */
+    ldr     r0, =__bss_start__
+    ldr     r1, =__bss_size__
+    add     r1, r0
+    mov     r2, #0
+0:
+    cmp     r0, r1
+    strlt   r2, [r0], #4
+    blt     0b
 
-.globl PUT32
-PUT32:
-	str r1,[r0]
-	bx lr
-	
-.globl GET32
-GET32:
-	ldr r0,[r0]
-	bx lr
-	
+    mov     r0, r3
+    b       main
+
 /*
 The MIT License (MIT)
 

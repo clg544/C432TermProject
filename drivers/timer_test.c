@@ -5,7 +5,7 @@
 int main() {
     /* int i; */
 
-    TIMER_init(0, 1000000, 0);
+    TIMER_init(0, 1000000, 0, 0);
     GPIO_init_port(1);
     GPIO_set_direction(1, 1<<21);
     while(1) {

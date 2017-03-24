@@ -2,10 +2,13 @@
 #include "timer.h"
 #include "clock.h"
 
-void TIMER_init(int timer, unsigned int value, int autoload) {
+void TIMER_init(int timer, unsigned int value, int autoload, int irq_enable) {
     CLOCK_enable_timer_clock(timer);
     TIMER_set_counter(timer, value);
     TIMER_auto_reload(timer, autoload);
+    if(1 == irq_enable) {
+        DEREF(DMTIMER0+IRQENABLE_SET) = 0x2;
+    }
 }
 
 /* The timer counts upward, which means you have to
@@ -83,3 +86,4 @@ void TIMER_delay(int port, int value) {
     TIMER_start(0);
     while(!TIMER_finished(0)){}
 }
+

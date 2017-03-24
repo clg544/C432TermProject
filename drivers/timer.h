@@ -12,15 +12,18 @@
 #define TCRR 0x3C /* Timer Counter Register */
 #define TLDR 0x40 /* Timer Load Register */
 #define TTGR 0x44 /* Timer Trigger Register */
+#define IRQENABLE_SET 0x2C /* Timer Interrupt enable set register*/
 
 #define MS_TCLR 0x24
 #define MS_CRR  0x28
 
 /* TODO move some of these to macros? */
 
-void TIMER_init(int timer, unsigned int value, int autoload);
+void TIMER_init(int timer, unsigned int value, int autoload, int irq_enable);
 
 void TIMER_set_counter(int timer, unsigned int value);
+
+void TIMER_set_counter_ms(int timer, unsigned int milliseconds);
 
 void TIMER_auto_reload(int timer, int autoload);
 
