@@ -17,6 +17,8 @@ _start:
     mov sp, r1
     sub r1, sp, #STACK_SIZE
 
+    bic r3, r3, #0x80 /* enable interrupts */
+
     /* return to svc */
     msr cpsr_cxsf, r3
 
@@ -36,7 +38,7 @@ _start:
 
 /*
 The MIT License (MIT)
-CMPT 432
+
 Copyright (c)  Alexis Marquet
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
