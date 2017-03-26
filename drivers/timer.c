@@ -6,10 +6,10 @@ void TIMER_init(int timer, unsigned int value, int autoload, int irq_enable) {
     CLOCK_enable_timer_clock(timer);
     TIMER_set_counter(timer, value);
     TIMER_auto_reload(timer, autoload);
-    if(1 == irq_enable) {
+    /* if(1 == irq_enable) { */
         DEREF(DMTIMER0+IRQENABLE_SET) = 0x2;
         DEREF(INTC + INTC_MIR_CLEAR2) |= 1<<11;
-    }
+    /* } */
 }
 
 /* The timer counts upward, which means you have to
@@ -32,16 +32,16 @@ void TIMER_set_counter(int timer, unsigned int value) {
 
 void TIMER_set_counter_ms(int timer, unsigned int miliseconds) {
     unsigned int value = 31*miliseconds;
-    switch(timer) {
-        case 0:
+    /* switch(timer) { */
+    /*     case 0: */
             DEREF(DMTIMER0 + TCRR) = 0xFFFFFFFF - value;
-            break;
-        case 2:
-            DEREF(DMTIMER2 + TCRR) = 0xFFFFFFFF - value;
-            break;
-        default:
-            break;
-    }
+    /*         break; */
+    /*     case 2: */
+    /*         DEREF(DMTIMER2 + TCRR) = 0xFFFFFFFF - value; */
+    /*         break; */
+    /*     default: */
+    /*         break; */
+    /* } */
 }
 
 void TIMER_auto_reload(int timer, int autoload) {
@@ -109,7 +109,7 @@ int TIMER_finished(int timer) {
 }
 
 void TIMER_delay(int timer, unsigned int value) {
-    TIMER_set_counter_ms(timer, value);
+    TIMER_set_counter_ms(0, value);
     TIMER_start(timer);
     while(!TIMER_finished(timer)){}
 }

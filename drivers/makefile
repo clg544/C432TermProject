@@ -15,7 +15,7 @@ OBJCOPY=$(CROSS_COMPILE)objcopy
 LD=$(CROSS_COMPILE)ld
 AS=$(CROSS_COMPILE)as
 
-CFLAGS=-std=gnu99 -Wall --pedantic -mfpu=neon -mhard-float -mcpu=cortex-a8 -O0
+CFLAGS=-std=gnu99 -marm -Wall --pedantic -mfpu=neon -mhard-float -mcpu=cortex-a8 -O0 -nostdlib -nostartfiles -ffreestanding -fstack-usage -Wstack-usage=256
 LDFLAGS=
 
 all: led_test.bin
@@ -24,8 +24,9 @@ all: led_test.bin
 .c.o:
 	$(CC) $(CFLAGS) -o $@ -c $^
 
-start.o: start.s
-	$(AS) -mfpu=neon start.s -o start.o
+.SUFFIXES: .s .o
+.s.o:
+	$(AS) -mfpu=neon -o $@ $^
 
 led_test.bin: led_test.o start.o gpio.o clock.o
 	$(LD) start.o gpio.o clock.o led_test.o -T memmap.ld -o led_test.elf
@@ -35,8 +36,8 @@ timer_test.bin: timer_test.o start.o gpio.o clock.o timer.o
 	$(LD) start.o timer.o gpio.o clock.o timer_test.o -T memmap.ld -o timer_test.elf
 	$(OBJCOPY) timer_test.elf timer_test.bin -O binary
 
-irq_test.bin: irq_test.o start.o gpio.o clock.o timer.o
-	$(LD) start.o timer.o gpio.o clock.o irq_test.o -T memmap.ld -o irq_test.elf
+irq_test.bin: irq_test.o irq.o rtc.o start.o gpio.o clock.o timer.o
+	$(LD) start.o irq.o rtc.o timer.o gpio.o clock.o irq_test.o -T memmap.ld -o irq_test.elf
 	$(OBJCOPY) irq_test.elf irq_test.bin -O binary
 
 uart_test.bin: uart_test.o start.o gpio.o clock.o uart.o
@@ -46,6 +47,6 @@ uart_test.bin: uart_test.o start.o gpio.o clock.o uart.o
 
 
 clean:
-	rm *.o *.bin *.elf
+	rm *.o *.bin *.elf *.su
 
 
