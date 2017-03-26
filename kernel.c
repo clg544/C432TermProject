@@ -2,7 +2,7 @@
 
 #include "versatilepb.h"
 #include "asm.h"
-#include "params.h"
+#include "param.h"
 #include "proc.h"
 
 unsigned int *init_task(unsigned int *stack, void (*start)(void)) {
