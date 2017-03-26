@@ -47,10 +47,3 @@ irq_init:
     bx lr
     .unreq r_base
 
-//
-// UNDefined interrupt service routine
-//
-.global und_isr
-und_isr:
-    SRSFD sp!, #0x1B
-    RFEFD sp!

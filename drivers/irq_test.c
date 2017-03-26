@@ -1,29 +1,11 @@
 #include "gpio.h"
 #include "timer.h"
 #include "common.h"
-extern void und_isr();
-extern void irq_isr();
+
 extern void irq_init();
 extern void rtc_init();
-extern void rtc_irq();
 
 volatile int irq_count;
-#define SOC_AINTC_REGS    0x48200000  // BBB ARM Interrupt Controller base address
-#define INTC_SIR_IRQ      0x40
-#define INTC_CONTROL      0x48
-
-void irq_isr() __attribute__((interrupt("IRQ")));
-void irq_isr() {
-    switch(DEREF(SOC_AINTC_REGS+INTC_SIR_IRQ)) {
-        case 75: // RTC timer
-            rtc_irq();
-            break;
-        default:
-            break;
-    }
-    DEREF(SOC_AINTC_REGS+INTC_CONTROL) = 1; // clear interrupt
-}
-
 
 void rtc_irq() {
     irq_count++;
