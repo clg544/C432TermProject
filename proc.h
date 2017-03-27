@@ -1,4 +1,4 @@
-#include "params.h"
+#include "param.h"
 
 #ifndef PROC_H
 #define PROC_H 
@@ -27,7 +27,6 @@ struct context { /*{r0,r1,r2,r3,r4,r5,r6,r7,r8,r9,r10,fp,ip,lr}*/
 } __attribute__ ((packed));
 
 
-*/
 /* OS structure that records process information. */
 struct process {
   enum procstate state;

@@ -5,7 +5,7 @@
 #include "param.h"
 #include "proc.h"
 
-unsigned int *init_task(unsigned int *stack, void (*start)(void)) {
+unsigned int *init_task(unsigned int* stack, void (*start)(void)) {
         stack += STACK_SIZE - 16; /* End of stack, minus what we're about to push */
         stack[0] = 0x10; /* User mode, interrupts on */
         stack[1] = (unsigned int)start;
@@ -75,13 +75,13 @@ void init(void){
 
 }
 
-struct process *startProc(struct process* proc){
+void startProc(struct process* proc){
 	proc->state = RUNNING;
 
 	bwputs("Entering process...\n");
-	activate(proc->stack);
+	proc->stack = activate(proc->stack);	
 
-	return proc;
+	return;
 }
 
 int main(void) {
@@ -89,15 +89,15 @@ int main(void) {
 	unsigned int stacks[TASK_LIMIT][STACK_SIZE]; */
 	/* Process Table that holds all processes */
 	struct process *ptable[TASK_LIMIT];
-	/* The currently running proc */
-	struct process *curProc;	
-
+	
 	size_t task_count = 0;
 	size_t current_task = 0;
 
-	/* An initializing stack */
-	unsigned int stack[STACK_SIZE];
-		
+	/* An initializing stack 
+	unsigned int stacks[STACK_SIZE];	 */
+
+	unsigned int s1[256];
+	unsigned int s2[256];
 
 	*(PIC + VIC_INTENABLE) = PIC_TIMER01;
 
@@ -107,52 +107,45 @@ int main(void) {
 	/* 20-03-17 - Make an initial process */
 
 	bwputs("Starting...\n");
-	
+
+	struct process p0;
+	ptable[0] = &p0;
 	ptable[0]->state = RUNNABLE;
 	ptable[0]->pid = 0;
 	ptable[0]->parentPid = 0;
-	ptable[0]->stack = stack;	
+	ptable[0]->stack = s1;	
 
-	ptable[0]->stack = init_task(ptable[0]->stack, &init);
+	ptable[0]->stack = init_task(ptable[0]->stack, &first);
 	task_count++;
 	
+	struct process p1;
+	ptable[1] = &p1;
+	ptable[1]->state = RUNNABLE;
+	ptable[1]->pid = 1;
+	ptable[1]->parentPid = 0;
+	ptable[1]->stack = s2;	
+
+	ptable[1]->stack = init_task(ptable[1]->stack, &second);
+	task_count++;
 	/* end */
 	
 	while(1) {
-		curProc = startProc(ptable[current_task]);
+		ptable[current_task]->stack = activate(ptable[current_task]->stack);
 
-		switch(curProc->stack[2+7]) {
-			case 0x1:
-				if(task_count == TASK_LIMIT) {
-					/* Cannot create a new task, return error */
-					curProc->stack[2+0] = -1;
-				} else {
-					/* Compute how much of the stack is used */
-					size_t used = curProc->stack + STACK_SIZE
-					              - curProc->stack;
-					/* New stack is END - used */
-					curProc->stack = ptable[task_count]->stack + STACK_SIZE - used;
-					/* Copy only the used part of the stack */
-					memcpy(ptable[task_count]->stack, curProc->stack,
-					       used*sizeof(*ptable[current_task]));
-					/* Set return values in each process */ 
-					curProc->stack[2+0] = task_count;
-					ptable[task_count]->stack[2+0] = 0; 
-					/* There is now one more task */
-					task_count++;
-				}
-				break;
-			case -4: /* Timer 0 or 1 went off */
+		switch(ptable[current_task]->stack[2+7]) {
+			
+			default: /* Catch all interrupts */
 				if(*(TIMER0 + TIMER_MIS)) { /* Timer0 went off */
-				*(TIMER0 + TIMER_INTCLR) = 1; /* Clear interrupt */
-				     bwputs("tick\n");
-				    } 
+					*(TIMER0 + TIMER_INTCLR) = 1; /* Clear interrupt */
+					bwputs("\n\ntick!\n\n");
+				}
 		}
 
 		current_task++;
-		if(current_task == task_count) current_task = 0;
+		if(current_task >= task_count) current_task = 0;
 	}
 	
 	return 0;
 }
+
 
