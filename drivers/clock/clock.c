@@ -1,5 +1,5 @@
-#include "clock.h"
-#include "common.h"
+#include <clock.h>
+#include <common.h>
 
 void CLOCK_enable_gpio_clock(unsigned int port) {
     switch(port) {

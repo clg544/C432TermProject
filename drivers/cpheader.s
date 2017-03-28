@@ -1,0 +1,23 @@
+.data
+.word 0x00000040; 
+.word 0x0000000C; 
+.word 0x00000000;
+.word 0x00000000;
+.word 0x00000000;
+.word 0x45534843;
+.word 0x4e495454;
+.word 0x00005347;
+.word 0xFFFFFFFF;
+.word 0xFFFFFFFF;
+.word 0xFFFFFFFF;
+.word 0xFFFFFFFF;
+.word 0xFFFFFFFF;
+.word 0xFFFFFFFF;
+.word 0xFFFFFFFF;
+.word 0xFFFFFFFF;
+.word 0xC0C0C0C1;
+.byte 0x00;
+.byte 0x01;
+.rept 442
+.byte 0x00;
+.endr

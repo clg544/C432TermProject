@@ -1,24 +1,37 @@
+OUTPUT_FORMAT("elf32-littlearm")
+OUTPUT_ARCH(arm)
+ENTRY(_start)
 
-/* memmap */
-MEMORY
-{
-   l3_ram : ORIGIN = 0x402F0400, LENGTH = 0x0001b400
+MEMORY {
+    ram : ORIGIN = 0x402F0400, LENGTH = 0x1B400
 }
 
 SECTIONS
 {
-   .text : { *(.text*) } > l3_ram
-   __data_rom_start__ = .;
-   .data : {
-    __data_start__ = .;
-    *(.data*)
-   } > l3_ram
-   __data_end__ = .;
-   __data_size__ = __data_end__ - __data_start__;
-   .bss  : {
-   __bss_start__ = .;
-   *(.bss*)
-   } > l3_ram
-   __bss_end__ = .;
-   __bss_size__ = __bss_end__ - __bss_start__;
+    .reset : {
+	start.o (.text)
+	. = ALIGN(0x4);
+    } > ram
+
+    .text : { 
+	*(.text .text.*)
+	. = ALIGN(0x4);
+	*(.rodata .rodata.*)
+    } > ram
+
+    .data : { 
+	__data_load = LOADADDR (.data);
+	__data_start = .;
+	*(.data .data.*) 
+	. = ALIGN(0x4);
+	__edata = .;
+    } > ram
+
+    .bss : { 
+	__bss_start__ = . ;
+	*(.bss .bss.*)
+	. = ALIGN (4);
+	__bss_end__ = .;
+	__bss_size__ = __bss_end__ - __bss_start__;
+     } > ram
 }
