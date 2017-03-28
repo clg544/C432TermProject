@@ -1,5 +1,5 @@
-.global Entry
-Entry: 
+.global _start
+_start: 
    mrs r0, cpsr
    bic r0, r0, #0x1F @ clear mode bits
    orr r0, r0, #0x13 @ set SVC mode
@@ -91,6 +91,9 @@ _cstartup:
     orr r1, r2, #0x13  @SVC_MODE
     msr CPSR_c, r1
     mov sp, r0
+
+    bic r1, r1, #0x80 /* enable interrupts */
+    msr CPSR_c, r1
     
     bl main
 
@@ -98,7 +101,7 @@ _cstartup:
     
 .data
 interrupt_address_table:
-.word svc_entry 
+.word 0x00000
 .word 0x20088 
 .word 0x2008C 
 .word 0x20090 
