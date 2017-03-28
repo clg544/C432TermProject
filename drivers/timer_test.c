@@ -1,19 +1,25 @@
-#include "gpio.h"
+#include "led.h"
 #include "timer.h"
+
+DMTIMER* dmtimer0 = (DMTIMER*)DMTIMER0;
+
+int light = 0;
+
+void led_blink(){
+    led_on(light + 1);
+    TIMER_delay(dmtimer0, 0xFFFF);
+    led_off(light + 1);
+    light += 1;
+    light = light % 4;
+}
 
 
 int main() {
     /* int i; */
-
-    TIMER_init(0, 1000000, 0);
-    GPIO_init_port(1);
-    GPIO_set_direction(1, 1<<21);
+    TIMER_init(dmtimer0, 1000000, 0);
+    led_init();
     while(1) {
-        GPIO_write_port(1, 1<<21);
-        TIMER_delay(0, 0xFFFF);
-        GPIO_write_port(1, 0);
-        TIMER_delay(0, 0xFFFF);
+	led_blink();
     }
-
     return 0;
 }

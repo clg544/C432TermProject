@@ -9,38 +9,44 @@
 # You may have to send it a few times for it to work
 #
 # TODO default to Ubuntu's tool chain name instead of Arch's
-CROSS_COMPILE = arm-none-eabi-
+CROSS_COMPILE = /usr/local/gcc-linaro-6.2.1-2016.11-x86_64_arm-linux-gnueabi/bin/arm-linux-gnueabi-
 CC=$(CROSS_COMPILE)gcc
 OBJCOPY=$(CROSS_COMPILE)objcopy
 LD=$(CROSS_COMPILE)ld
 AS=$(CROSS_COMPILE)as
-
-CFLAGS=-std=gnu99 -Wall --pedantic -mfpu=neon -mhard-float -mcpu=cortex-a8
-LDFLAGS=
-
-all: led_test.bin
-
-.SUFFIXES: .c .o
-.c.o:
-	$(CC) $(CFLAGS) -o $@ -c $^
-
-start.o: start.s
-	$(AS) -mfpu=neon start.s -o start.o
-
-led_test.bin: led_test.o start.o gpio.o clock.o
-	$(LD) start.o gpio.o clock.o led_test.o -T memmap.ld -o led_test.elf
-	$(OBJCOPY) led_test.elf led_test.bin -O binary
-
-timer_test.bin: timer_test.o start.o gpio.o clock.o timer.o
-	$(LD) start.o timer.o gpio.o clock.o timer_test.o -T memmap.ld -o timer_test.elf
-	$(OBJCOPY) timer_test.elf timer_test.bin -O binary
-
-uart_test.bin: uart_test.o start.o gpio.o clock.o uart.o
-	$(LD) $(LDFLAGS) start.o uart.o gpio.o clock.o uart_test.o -T memmap.ld -o uart_test.elf
-	$(OBJCOPY) uart_test.elf uart_test.bin -O binary
-
-
-
+Kernel=timer_test.bin
+CFLAGS= -Wall -Wextra --pedantic -mcpu=cortex-a8 -mtune=cortex-a8 -march=armv7-a -mlong-calls -fdata-sections -funsigned-char -mfpu=neon -mfloat-abi=softfp 
+LDFLAGS= -e Entry -u Entry -u __aeabi_uidiv -u __aeabi_idiv --gc-sections
+Generic= start.o gpio.o clock.o timer.o uart.o interrupt_handler.o led.o
+ 
+all: bootable.img cpheader.bin
+	
+gpheader.s: $(Kernel)
+	FILESIZE=$$(stat -c%s "$(Kernel)") ;\
+	echo ".data" | cat > gpheader.s ;\
+	echo ".word $$FILESIZE" | cat >> gpheader.s ;\
+	echo ".word 0x402F0400" | cat >> gpheader.s ;
+bootable.img: gpheader.bin $(Kernel) 
+	cat gpheader.bin $(Kernel) > bootable.img
+	
+led_test.elf: $(Generic) led_test.o 
+	$(LD) $(LDFLAGS) $^ -T memmap.ld -o led_test.elf
+timer_test.elf: $(Generic)  timer_test.o 
+	$(LD) $(LDFLAGS) $^ -T memmap.ld -o timer_test.elf
+uart_test.elf: $(Generic) uart_test.o 
+	$(LD) $(LDFLAGS) $^ -T memmap.ld -o uart_test.elf
+timer_test.o:
+	$(CC) $(CFLAGS) -c 
+%.o: $(patsubst %.o,,$@)/%.o
+     cd $(patsubst %.o,,$@);\
+     make;\
+     mv ./$@ ../$@ ;\
+%.bin: %.elf
+	$(CROSS_COMPILE)objcopy -O binary $^ $@
+%.bin: %.o
+	$(CROSS_COMPILE)objcopy -O binary $^ $@
+output: $(Kernel)
+	$(CROSS_COMPILE)objdump -D $(Kernel:.bin=.elf)
 clean:
 	rm *.o *.bin *.elf
 
