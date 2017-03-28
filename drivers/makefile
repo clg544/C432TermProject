@@ -9,14 +9,15 @@
 # You may have to send it a few times for it to work
 #
 # TODO default to Ubuntu's tool chain name instead of Arch's
+.PHONY: tests
 CROSS_COMPILE = /usr/local/gcc-linaro-6.2.1-2016.11-x86_64_arm-linux-gnueabi/bin/arm-linux-gnueabi-
 CC=$(CROSS_COMPILE)gcc
 OBJCOPY=$(CROSS_COMPILE)objcopy
 LD=$(CROSS_COMPILE)ld
 AS=$(CROSS_COMPILE)as
-Kernel=timer_test.elf
+Kernel=uart_test.elf
 CFLAGS= -Wall -Wextra --pedantic -mcpu=cortex-a8 -mtune=cortex-a8 -march=armv7-a -mlong-calls -fdata-sections -funsigned-char -mfpu=neon -mfloat-abi=softfp 
-LDFLAGS= -e Entry -u Entry -u __aeabi_uidiv -u __aeabi_idiv --gc-sections
+LDFLAGS= -e _start -u Entry -u __aeabi_uidiv -u __aeabi_idiv --gc-sections
 Generic= start.o gpio.o clock.o timer.o uart.o interrupt_handler.o led.o
 PWD=$(shell pwd)
 INCLUDE= -I$(PWD)/include/
@@ -34,22 +35,20 @@ gpheader.s: $(Kernel:.elf=.bin)
 bootable.img: gpheader.bin $(Kernel:.elf=.bin)
 	cat gpheader.bin $(Kernel:.elf=.bin) > bootable.img
 	
-led_test.elf: $(Generic) led_test.o 
-	$(LD) $(LDFLAGS) $^ -T memmap.ld -o led_test.elf
-timer_test.elf: $(Generic)  timer_test.o 
-	$(LD) $(LDFLAGS) $^ -T memmap.ld -o timer_test.elf
-uart_test.elf: $(Generic) uart_test.o 
-	$(LD) $(LDFLAGS) $^ -T memmap.ld -o uart_test.elf
-timer_test.o: timer_test.c 
-	$(CC) $(CFLAGS) $(INCLUDE) -c $^
+%.elf: $(Generic) tests 
+	$(LD) $(LDFLAGS) $(Generic) $(patsubst %.elf,%.o,$@) -T memmap.ld -o $@
 %.o: %.s
 	$(CC) $(CFLAGS) $(INCLUDE) -c $^
 %.o: 
 	$(MAKE) $@ -f$(PWD)/generic_makefile -C $(PWD)/$(patsubst %.o,%,$@);\
 	mv $(PWD)/$(patsubst %.o,%,$@)/$@ ./$@ ;
-%.bin: %.elf
+tests:
+	$(MAKE) -C ./tests
+gpheader.bin: gpheader.o
 	$(CROSS_COMPILE)objcopy -O binary $^ $@
-%.bin: %.o
+cpheader.bin: cpheader.o
+	$(CROSS_COMPILE)objcopy -O binary $^ $@
+%.bin: %.elf
 	$(CROSS_COMPILE)objcopy -O binary $^ $@
 output: $(Kernel)
 	$(CROSS_COMPILE)objdump -D $(Kernel:.bin=.elf)

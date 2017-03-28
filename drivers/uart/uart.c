@@ -71,7 +71,6 @@ void UART_send_char(char c) {
     /* wait for transmit register to be empty */
     while((DEREF8(UART_PORT0+LSR_UART)&0x20) != 0x20){}
     DEREF8(UART_PORT0) = c;
-
 }
 
 char UART_read_char() {
@@ -81,7 +80,7 @@ char UART_read_char() {
 }
 
 void UART_puts(char *s, unsigned int length) {
-    for(int i=0; i<length; i++) {
+    for(unsigned int i=0; i < length; i++) {
         UART_send_char(s[i]);
     }
 }

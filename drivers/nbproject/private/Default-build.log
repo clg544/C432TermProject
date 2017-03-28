@@ -1,3 +1,0 @@
-arm-none-eabi-gcc -std=gnu99 -Wall --pedantic -mfpu=neon -mhard-float -mcpu=cortex-a8 -o led_test.o -c led_test.c
-make: arm-none-eabi-gcc: No such file or directory
-make: *** [led_test.o] Error 1
