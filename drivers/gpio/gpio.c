@@ -1,7 +1,7 @@
-#include "gpio.h"
+#include <gpio.h>
 #include "gpio_hw.h"
-#include "clock.h"
-#include "common.h"
+#include <clock.h>
+#include <common.h>
 
 void GPIO_init_port(int port) {
     switch(port) {
@@ -27,6 +27,6 @@ void GPIO_write_port(unsigned int baseAdd, int port, int value) {
     DEREF(baseAdd + GPIO_DATAOUT) = ((DEREF(baseAdd + GPIO_DATAOUT) & mask) | (value << port));
 }
 
-int GPIO_read_port(GPIO* gpio) {
+int GPIO_read_port(unsigned int baseAdd) {
     return -1;
 }

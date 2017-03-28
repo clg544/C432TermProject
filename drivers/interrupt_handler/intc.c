@@ -5,7 +5,6 @@
  
  */
 
-#include "structINTC.h"
 
 INTC* intc = (INTC*)0x48200000;
 

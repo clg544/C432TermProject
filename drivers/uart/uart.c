@@ -1,6 +1,6 @@
-#include "uart.h"
-#include "clock.h"
-#include "common.h"
+#include <uart.h>
+#include <clock.h>
+#include <common.h>
 
 void UART_soft_reset(unsigned int port) {
     switch(port) {

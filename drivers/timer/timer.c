@@ -3,7 +3,7 @@
 #include <clock.h>
 #include "dmtimer_hw.h"
 
-void TIMER_init(DMTIMER* timer, unsigned int value, int autoload) {
+void TIMER_init(unsigned int timer, unsigned int value, int autoload) {
     CLOCK_enable_timer_clock(0);
     TIMER_set_auto_reload(timer, autoload);
 }

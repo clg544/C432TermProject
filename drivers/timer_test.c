@@ -1,8 +1,7 @@
-#include "led.h"
-#include "timer.h"
+#include <led.h>
+#include <timer.h>
 
-DMTIMER* dmtimer0 = (DMTIMER*)DMTIMER0;
-
+unsigned int dmtimer0 = DMTIMER0;
 int light = 0;
 
 void led_blink(){

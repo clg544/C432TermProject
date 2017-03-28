@@ -4,7 +4,6 @@
     <df root="." name="0">
       <df name="clock">
         <in>clock.c</in>
-        <in>makefile</in>
       </df>
       <df name="gpio">
         <in>gpio_hw.h</in>
@@ -15,12 +14,14 @@
       <df name="led">
         <in>led.c</in>
       </df>
+      <df name="start">
+        <in>start.s</in>
+      </df>
       <df name="timer">
         <in>dmtimer_hw.h</in>
         <in>timer.c</in>
       </df>
       <in>led_test.c</in>
-      <in>start.s</in>
       <in>timer_test.c</in>
     </df>
     <logicalFolder name="ExternalFiles"
@@ -59,8 +60,6 @@
       </makefileType>
       <item path="clock/clock.c" ex="false" tool="0" flavor2="0">
       </item>
-      <item path="clock/makefile" ex="false" tool="3" flavor2="0">
-      </item>
       <item path="gpio/gpio_hw.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="include/led.h" ex="false" tool="3" flavor2="0">
@@ -69,7 +68,7 @@
       </item>
       <item path="led_test.c" ex="false" tool="0" flavor2="0">
       </item>
-      <item path="start.s" ex="false" tool="4" flavor2="0">
+      <item path="start/start.s" ex="false" tool="4" flavor2="0">
       </item>
       <item path="timer/dmtimer_hw.h" ex="false" tool="3" flavor2="0">
       </item>

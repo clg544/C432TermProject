@@ -11,10 +11,10 @@ typedef struct GPIO GPIO;
 
 void GPIO_init_port(int port);
 
-void GPIO_set_direction (GPIO* gpio, int dir);
+void GPIO_set_direction (unsigned int baseAdd, int dir);
 
-void GPIO_write_port(GPIO* gpio,int port ,int value);
+void GPIO_write_port(unsigned int baseAdd,int port ,int value);
 
-int GPIO_read_port(GPIO* gpio);
+int GPIO_read_port(unsigned int baseAdd);
 
 #endif

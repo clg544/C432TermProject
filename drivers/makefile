@@ -14,20 +14,25 @@ CC=$(CROSS_COMPILE)gcc
 OBJCOPY=$(CROSS_COMPILE)objcopy
 LD=$(CROSS_COMPILE)ld
 AS=$(CROSS_COMPILE)as
-Kernel=timer_test.bin
+Kernel=timer_test.elf
 CFLAGS= -Wall -Wextra --pedantic -mcpu=cortex-a8 -mtune=cortex-a8 -march=armv7-a -mlong-calls -fdata-sections -funsigned-char -mfpu=neon -mfloat-abi=softfp 
 LDFLAGS= -e Entry -u Entry -u __aeabi_uidiv -u __aeabi_idiv --gc-sections
 Generic= start.o gpio.o clock.o timer.o uart.o interrupt_handler.o led.o
- 
+PWD=$(shell pwd)
+INCLUDE= -I$(PWD)/include/
+export CFLAGS
+export LDFLAGS
+export CC
+export INCLUDE
 all: bootable.img cpheader.bin
 	
-gpheader.s: $(Kernel)
-	FILESIZE=$$(stat -c%s "$(Kernel)") ;\
+gpheader.s: $(Kernel:.elf=.bin)
+	FILESIZE=$$(stat -c%s "$(Kernel:.elf=.bin)") ;\
 	echo ".data" | cat > gpheader.s ;\
 	echo ".word $$FILESIZE" | cat >> gpheader.s ;\
 	echo ".word 0x402F0400" | cat >> gpheader.s ;
-bootable.img: gpheader.bin $(Kernel) 
-	cat gpheader.bin $(Kernel) > bootable.img
+bootable.img: gpheader.bin $(Kernel:.elf=.bin)
+	cat gpheader.bin $(Kernel:.elf=.bin) > bootable.img
 	
 led_test.elf: $(Generic) led_test.o 
 	$(LD) $(LDFLAGS) $^ -T memmap.ld -o led_test.elf
@@ -35,12 +40,13 @@ timer_test.elf: $(Generic)  timer_test.o
 	$(LD) $(LDFLAGS) $^ -T memmap.ld -o timer_test.elf
 uart_test.elf: $(Generic) uart_test.o 
 	$(LD) $(LDFLAGS) $^ -T memmap.ld -o uart_test.elf
-timer_test.o:
-	$(CC) $(CFLAGS) -c 
-%.o: $(patsubst %.o,,$@)/%.o
-     cd $(patsubst %.o,,$@);\
-     make;\
-     mv ./$@ ../$@ ;\
+timer_test.o: timer_test.c 
+	$(CC) $(CFLAGS) $(INCLUDE) -c $^
+%.o: %.s
+	$(CC) $(CFLAGS) $(INCLUDE) -c $^
+%.o: 
+	$(MAKE) $@ -f$(PWD)/generic_makefile -C $(PWD)/$(patsubst %.o,%,$@);\
+	mv $(PWD)/$(patsubst %.o,%,$@)/$@ ./$@ ;
 %.bin: %.elf
 	$(CROSS_COMPILE)objcopy -O binary $^ $@
 %.bin: %.o

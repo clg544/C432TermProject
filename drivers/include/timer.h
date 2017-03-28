@@ -10,22 +10,20 @@
 #define MS_TCLR 0x24
 #define MS_CRR  0x28
 
-typedef struct DMTIMER DMTIMER;
-
 /* TODO move some of these to macros? */
 
-void TIMER_init(DMTIMER* timer, unsigned int value, int autoload);
+void TIMER_init(unsigned int timer, unsigned int value, int autoload);
 
-void TIMER_set_counter(DMTIMER* timer, unsigned int value);
+void TIMER_set_counter(unsigned int timer, unsigned int value);
 
-void TIMER_set_auto_reload(DMTIMER* timer, int autoload);
+void TIMER_set_auto_reload(unsigned int timer, int autoload);
 
-void TIMER_start(DMTIMER* timer);
+void TIMER_start(unsigned int timer);
 
-void TIMER_stop(DMTIMER* timer);
+void TIMER_stop(unsigned int timer);
 
-int TIMER_finished(DMTIMER* timer);
+int TIMER_finished(unsigned int timer);
 
-void TIMER_delay(DMTIMER* timer, int value);
+void TIMER_delay(unsigned int timer, int value);
 
 #endif

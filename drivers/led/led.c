@@ -4,10 +4,10 @@
  * and open the template in the editor.
  */
 
-#include "led.h"
-#include "gpio.h"
+#include <led.h>
+#include <gpio.h>
 
-GPIO* gpio1 = (GPIO*)GPIO_PORT1;
+unsigned int gpio1 = GPIO_PORT1;
 
 void led_init(){
     GPIO_init_port(1);

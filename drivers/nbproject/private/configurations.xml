@@ -4,28 +4,30 @@
     <df root="." name="0">
       <df name="clock">
         <in>clock.c</in>
-        <in>clock.h</in>
-        <in>makefile</in>
       </df>
       <df name="gpio">
         <in>gpio.c</in>
         <in>gpio_hw.h</in>
       </df>
       <df name="include">
+        <in>clock.h</in>
         <in>common.h</in>
         <in>gpio.h</in>
+        <in>interrupt_handler.h</in>
         <in>led.h</in>
         <in>timer.h</in>
         <in>uart.h</in>
       </df>
-      <df name="interrrupt_handler">
+      <df name="interrupt_handler">
         <in>intc.c</in>
         <in>intc.h</in>
         <in>interrupt_handler.c</in>
-        <in>interrupt_handler.h</in>
       </df>
       <df name="led">
         <in>led.c</in>
+      </df>
+      <df name="start">
+        <in>start.s</in>
       </df>
       <df name="timer">
         <in>dmtimer_hw.h</in>
@@ -37,7 +39,6 @@
       </df>
       <in>cpheader.s</in>
       <in>led_test.c</in>
-      <in>start.s</in>
       <in>timer_test.c</in>
     </df>
   </logicalFolder>
