@@ -71,6 +71,15 @@ unsigned int *startProc(struct process *proc){
 }
 
 
+/**
+ * void init() - The init process from which all other procs branch
+ */
+void init(){
+
+}
+
+
+
 int main(void) {
 	int i;	
 
@@ -106,9 +115,28 @@ int main(void) {
 
 		switch(ptable[current_task].stack[2+7]) {
 			case 0x1: /* fork */
-				/* Syscall sanity test  */
+				bwputs("fork...");
+				if(task_count == TASK_LIMIT) {
+					bwputs("Fork Failed.");
+					/* Cannot create a new task, return error */
+					ptable[current_task].stack[2+0] = -1;
+				} else {
+					bwputs("Fork Success");
+					/* Compute how much of the stack is used */
+					size_t used = (int) (ptable[current_task].stack + STACK_SIZE
+					              - &stacks[current_task][0]);
+					/* New stack is END - used */
+					ptable[task_count].stack = stacks[task_count] + STACK_SIZE - used;
+					/* Copy only the used part of the stack */
+					memcpy(stacks[task_count], stacks[current_task],
+					       used*sizeof(stacks[current_task][0]));
+					/* Set return values in each process */
+					ptable[current_task].stack[2+0] = task_count;
+					ptable[task_count].stack[2+0] = 0;
+					/* There is now one more task */
+					task_count++;
+				}
 				break;
-		
 			default: /* Catch all interrupts */
 				if(*(TIMER0 + TIMER_MIS)) { /* Timer0 went off */
 					*(TIMER0 + TIMER_INTCLR) = 1; /* Clear interrupt */
