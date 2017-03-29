@@ -37,5 +37,9 @@ struct process {
   struct context pcontext;
 };
 
+/* Process Table that holds all processes */
+struct process ptable[TASK_LIMIT];
+unsigned int stacks[TASK_LIMIT][STACK_SIZE]; 
+
 #endif /* PROC_H */
 
