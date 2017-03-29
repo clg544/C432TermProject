@@ -1,3 +1,4 @@
+.equ STACK_SIZE, 256
 .global _start
 _start:
    mrs r0, cpsr
@@ -55,49 +56,48 @@ _invalidate_d_cache:
     mrc p15, 0, r1, c1, c0, 0
     orr r1, r1, #(0x1 << 11)
     mcr p15, 0, r1, c1, c0, 0
-_cstartup:
-    ldr r1,=__bss_start__
-    ldr r2,=__bss_end__
-    ldr r3,=__edata
-    1:
-	cmp r1,r2
-	stmltia r1!,{r3}
-	blt 1b
 
-    ldr r0, =0x4030CDFC
-    ldr r3, =0x3aa @(938)
+    /* setup stack pointer */
+    /*
+    ldr sp, =0x4030CDFC
+    sub r1, sp, #STACK_SIZE
+    */
 
-    ldr r2, =0xC0  @(I_BIT | F_BIT)
-    orr r1, r2, #0x10  @IRQ_MODE
-    msr CPSR_c, r1
-    mov sp, r0
-    sub r0, r0, r3
+    /* save svc */
+    mrs r3, cpsr
 
-    orr r1, r2 , #0x11  @FIQ_MODE
-    msr CPSR_c, r1
-    mov sp, r0
-    sub r0, r0, r3
+    /*
+    mov r2, #0x1b @undef
+    msr cpsr_cxsf, r2
+    mov sp, r1
+    sub r1, sp, #STACK_SIZE
 
-    orr r1, r2, #0x17  @ABT_MODE
-    msr CPSR_c, r1
-    mov sp, r0
-    sub r0, r0, r3
+    mov r2, #0x12 @irq
+    msr cpsr_cxsf, r2
+    mov sp, r1
+    sub r1, sp, #STACK_SIZE
+    */
 
-    orr r1, r2, #0x1b  @UND_MODE
-    msr CPSR_c, r1
-    mov sp, r0
-    sub r0, r0, r3
+    bic r3, r3, #0x80 /* enable interrupts */
 
-    orr r1, r2, #0x13  @SVC_MODE
-    msr CPSR_c, r1
-    mov sp, r0
+    /* return to svc */
+    msr cpsr_cxsf, r3
 
-    bic r1, r1, #0x80 /* enable interrupts */
-    msr CPSR_c, r1
+    /*mov r3, r0 */
+    /* zero out bss */
+    /*
+    ldr     r0, =__bss_start__
+    ldr     r1, =__bss_size__
+    add     r1, r0
+    mov     r2, #0
+0:
+    cmp     r0, r1
+    strlt   r2, [r0], #4
+    blt     0b
 
-    bl main
-
-    .loop: b .loop
+    mov     r0, r3
+    */
+    b       main
 
 .data
 interrupt_address_table:
@@ -108,28 +108,6 @@ interrupt_address_table:
 .word irq_entry
 .word fiq_entry
 interrupt_address_table_end:
-
-
-/* public ram exception vector 4030CE00h */
-/* 4030CE00h Reserved */
-/* 4030CE04h Undefined */
-/* 4030CE08h SWI */
-/* 4030CE0Ch Pre-fetch abort */
-/* 4030CE10h Data abort */
-/* 4030CE14h Unused */
-/* 4030CE18h IRQ */
-/* 4030CE1Ch FIQ */
-/* 4030CE20h Reserved */
-/* 4030CE24h Undefined */
-/* 4030CE28h SWI */
-/* 4030CE2Ch Pre-fetch abort */
-/* 4030CE30h Data abort */
-/* 4030CE34h Unused */
-/* 4030CE38h IRQ */
-/* 4030CE3Ch FIQ  */
-
-
-
 
 /*
 The MIT License (MIT)

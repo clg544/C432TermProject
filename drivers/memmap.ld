@@ -9,7 +9,7 @@ MEMORY {
 SECTIONS
 {
     .reset : {
-	start_old.o (.text)
+	start.o (.text)
 	. = ALIGN(0x4);
     } > ram
 

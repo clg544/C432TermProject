@@ -16,11 +16,12 @@ OBJCOPY=$(CROSS_COMPILE)objcopy
 LD=$(CROSS_COMPILE)ld
 AS=$(CROSS_COMPILE)as
 
-#CFLAGS=-std=gnu99 -marm -Wall --pedantic -mfpu=neon -mhard-float -mcpu=cortex-a8 -O0 -nostdlib -nostartfiles -ffreestanding -fstack-usage -Wstack-usage=256
+# CFLAGS=-std=gnu99 -marm -Wall --pedantic -mfpu=neon -mhard-float -mcpu=cortex-a8 -O0 -nostdlib -nostartfiles -ffreestanding -fstack-usage -Wstack-usage=256
 Kernel=irq_test.elf
 CFLAGS= -Wall -Wextra --pedantic -mcpu=cortex-a8 -mtune=cortex-a8 -march=armv7-a -mlong-calls -fdata-sections -funsigned-char -mfpu=neon -mfloat-abi=softfp 
 LDFLAGS= -e _start -u Entry -u __aeabi_uidiv -u __aeabi_idiv --gc-sections
-Generic= start.o rtc.o gpio.o clock.o timer.o uart.o interrupt_handler.o led.o 
+# LDFLAGS=
+Generic= start.o interrupt_handler.o rtc.o gpio.o led.o clock.o
 PWD=$(shell pwd)
 INCLUDE= -I$(PWD)/include/
 export CFLAGS

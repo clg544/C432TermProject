@@ -31,7 +31,7 @@ interrupt_handler.o: interrupt_handler/interrupt_handler.c
 	$(CC) $(CFLAGS) -o $@ -c $^
 rtc.o: rtc.s
 	$(CC) $(CFLAGS) -o $@ -c $^
-start_old.o: start/start_old.s
+start.o: start/start.s
 	$(CC) $(CFLAGS) -o $@ -c $^
 gpio.o: gpio/gpio.c
 	$(CC) $(CFLAGS) -o $@ -c $^
@@ -55,8 +55,8 @@ timer_test.bin: timer_test.o start.o gpio.o clock.o timer.o
 	$(LD) start.o timer.o gpio.o clock.o timer_test.o -T memmap.ld -o timer_test.elf
 	$(OBJCOPY) timer_test.elf timer_test.bin -O binary
 
-irq_test.bin: irq_test.o interrupt_handler.o rtc.o start_old.o gpio.o clock.o led.o
-	$(LD) start_old.o interrupt_handler.o rtc.o gpio.o led.o clock.o irq_test.o -T memmap.ld -o irq_test.elf
+irq_test.bin: irq_test.o interrupt_handler.o rtc.o start.o gpio.o clock.o led.o
+	$(LD) start.o interrupt_handler.o rtc.o gpio.o led.o clock.o irq_test.o -T memmap.ld -o irq_test.elf
 	$(OBJCOPY) irq_test.elf irq_test.bin -O binary
 
 uart_test.bin: uart_test.o start.o gpio.o clock.o uart.o
