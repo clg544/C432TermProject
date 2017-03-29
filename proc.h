@@ -3,7 +3,7 @@
 #ifndef PROC_H
 #define PROC_H 
 
-enum procstate { SLEEPING, RUNNING, RUNNABLE, KILLED };
+enum procstate { SLEEPING, RUNNING, RUNNABLE, KILLED, UNUSED };
 
 /* Struct that holds a snapshot of the process. */
 struct context { /*{r0,r1,r2,r3,r4,r5,r6,r7,r8,r9,r10,fp,ip,lr}*/
