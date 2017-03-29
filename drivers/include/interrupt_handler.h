@@ -17,10 +17,19 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+    
+#define INT_CONTROLLER    0x48200000
+
+#define VECT_UND 0x4030CE24 /* undefined instruction RAM exception vector */
+#define VECT_IRQ 0x4030CE38 /* IRQ RAM exception vector */
+#define VECT_FIQ 0x4030CE3C
 
 void svc_entry(void);
 void irq_entry(void);
 void fiq_entry(void);
+
+void irq_init();
+void rtc_irq();
 
 #ifdef __cplusplus
 }

@@ -1,11 +1,15 @@
-#include <common.h>
-#include <timer.h>
-#include <clock.h>
-#include "dmtimer_hw.h"
+#include "common.h"
+#include "timer.h"
+#include "clock.h"
 
-void TIMER_init(unsigned int timer, unsigned int value, int autoload) {
-    CLOCK_enable_timer_clock(0);
-    TIMER_set_auto_reload(timer, autoload);
+void TIMER_init(int timer, unsigned int value, int autoload, int irq_enable) {
+    CLOCK_enable_timer_clock(timer);
+    TIMER_set_counter(timer, value);
+    TIMER_auto_reload(timer, autoload);
+    /* if(1 == irq_enable) { */
+        DEREF(DMTIMER0+IRQENABLE_SET) = 0x2;
+        DEREF(INTC + INTC_MIR_CLEAR2) |= 1<<11;
+    /* } */
 }
 
 /* The timer counts upward, which means you have to
@@ -13,43 +17,100 @@ void TIMER_init(unsigned int timer, unsigned int value, int autoload) {
  * This function makes it more intuitive by making a
  * small value for the counter take less time.
  */
-void TIMER_set_counter(unsigned int timer, unsigned int value) {
-    DEREF(timer + DMTIMER_TCRR) = 0xFFFFFFFF - value;
+void TIMER_set_counter(int timer, unsigned int value) {
+    switch(timer) {
+        case 0:
+            DEREF(DMTIMER0 + TCRR) = 0xFFFFFFFF - value;
+            break;
+        case 2:
+            DEREF(DMTIMER2 + TCRR) = 0xFFFFFFFF - value;
+            break;
+        default:
+            break;
+    }
 }
 
-void TIMER_set_counter_ms(unsigned int timer, unsigned int miliseconds) {
+void TIMER_set_counter_ms(int timer, unsigned int miliseconds) {
     unsigned int value = 31*miliseconds;
-    DEREF(timer + DMTIMER_TCRR)  = 0xFFFFFFFF - value;
-    /* DEREF(DMTIMER1_1MS + MS_TCRR) = 0xFFFFFFFF - value; */
+    /* switch(timer) { */
+    /*     case 0: */
+            DEREF(DMTIMER0 + TCRR) = 0xFFFFFFFF - value;
+    /*         break; */
+    /*     case 2: */
+    /*         DEREF(DMTIMER2 + TCRR) = 0xFFFFFFFF - value; */
+    /*         break; */
+    /*     default: */
+    /*         break; */
+    /* } */
 }
 
-void TIMER_set_auto_reload(unsigned timer, int value) {
-    unsigned int mask = ~(1 << 1);
-    DEREF(timer + DMTIMER_TCLR) = DEREF(timer + DMTIMER_TCLR) | ((~mask) & (value << 1));
+void TIMER_auto_reload(int timer, int autoload) {
+    switch(timer) {
+        case 0:
+            if (autoload)
+                DEREF(DMTIMER0 + TCLR) |= 0x2; /* AR bit 1 */
+            else
+                DEREF(DMTIMER0 + TCLR) &= ~0x2; /* AR bit 1 */
+            break;
+        case 2:
+            if (autoload)
+                DEREF(DMTIMER2 + TCLR) |= 0x2; /* AR bit 1 */
+            else
+                DEREF(DMTIMER2 + TCLR) &= ~0x2; /* AR bit 1 */
+        default:
+            break;
+    }
+
 }
 
-void TIMER_start(unsigned int timer) {
-    DEREF(timer + DMTIMER_TCLR) |= 0x1; /* ST bit 0 */  
+void TIMER_start(int timer) {
+    switch(timer) {
+        case 0:
+            DEREF(DMTIMER0 + TCLR) |= 0x1; /* ST bit 0 */
+            break;
+        case 2:
+            DEREF(DMTIMER2 + TCLR) |= 0x1; /* ST bit 0 */
+            break;
+        default:
+            break;
+    }
 }
 
-void TIMER_stop(unsigned int timer) {
-    DEREF(timer + DMTIMER_TCLR) &= ~0x1; /* ST bit 0 */
+void TIMER_stop(int timer) {
+    switch(timer) {
+        case 0:
+            DEREF(DMTIMER0 + TCLR) &= ~0x1; /* ST bit 0 */
+            break;
+        case 2:
+            DEREF(DMTIMER2 + TCLR) &= ~0x1; /* ST bit 0 */
+            break;
+        default:
+            break;
+    }
 }
+
 
 /* Timer stays at zero after overflow, assuming auto reload
  * is not enabled
  * */
-int TIMER_finished(unsigned int timer) {
-   volatile int i = ((DEREF(timer + DMTIMER_TCLR) & 0x1) == 0);
-   return i;
+int TIMER_finished(int timer) {
+    int val = -1;
+    switch(timer) {
+        case 0:
+            return (DEREF(DMTIMER0 + TCLR) & 0x1) == 0;
+            break;
+        case 2:
+            return (DEREF(DMTIMER2 + TCLR) & 0x1) == 0;
+            break;
+        default:
+            break;
+    }
+    return val;
 }
 
-void TIMER_delay(unsigned int timer, int value) {
-    asm volatile ("dsb");
-    TIMER_set_counter(timer, value);
-    asm volatile ("dsb");
+void TIMER_delay(int timer, unsigned int value) {
+    TIMER_set_counter_ms(0, value);
     TIMER_start(timer);
-    asm volatile ("dsb");
-    while(!TIMER_finished(timer));
-    asm volatile ("dsb");
+    while(!TIMER_finished(timer)){}
 }
+

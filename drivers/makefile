@@ -10,7 +10,7 @@
 #
 # TODO default to Ubuntu's tool chain name instead of Arch's
 .PHONY: tests
-CROSS_COMPILE = arm-none-eabi-
+CROSS_COMPILE = /usr/local/gcc-linaro-6.2.1-2016.11-x86_64_arm-linux-gnueabi/bin/arm-linux-gnueabi-
 CC=$(CROSS_COMPILE)gcc
 OBJCOPY=$(CROSS_COMPILE)objcopy
 LD=$(CROSS_COMPILE)ld
@@ -20,7 +20,7 @@ AS=$(CROSS_COMPILE)as
 Kernel=irq_test.elf
 CFLAGS= -Wall -Wextra --pedantic -mcpu=cortex-a8 -mtune=cortex-a8 -march=armv7-a -mlong-calls -fdata-sections -funsigned-char -mfpu=neon -mfloat-abi=softfp 
 LDFLAGS= -e _start -u Entry -u __aeabi_uidiv -u __aeabi_idiv --gc-sections
-Generic= start.o rtc.o gpio.o clock.o timer.o uart.o interrupt_handler.o led.o 
+Generic= start.o rtc.o gpio.o clock.o timer.o uart.o interrupt_handler.o led.o
 PWD=$(shell pwd)
 INCLUDE= -I$(PWD)/include/
 export CFLAGS

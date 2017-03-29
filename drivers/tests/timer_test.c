@@ -15,7 +15,7 @@ void led_blink(){
 
 int main() {
     /* int i; */
-    TIMER_init(dmtimer0, 1000000, 0);
+    TIMER_init(dmtimer0, 1000000, 0, 0);
     led_init();
     while(1) {
 	led_blink();
