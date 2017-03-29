@@ -58,6 +58,6 @@ cpheader.bin: cpheader.o
 output: $(Kernel)
 	$(CROSS_COMPILE)objdump -D $(Kernel:.bin=.elf)
 clean:
-	rm *.o *.bin *.elf *.su
+	rm -f *.o *.bin *.elf *.su *.img gpheader.s
 
 
