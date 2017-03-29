@@ -34,7 +34,6 @@ struct process {
   
   int parentPid;
   unsigned int *stack;   
-  struct context pcontext;
 };
 
 /* Process Table that holds all processes */

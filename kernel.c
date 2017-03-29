@@ -45,7 +45,6 @@ void bwputs(char* s){
 void first(void) {
 	while(1) {
 		bwputs("In first...\n");
-		fork();
 	}
 }
 void second(void) {
@@ -75,7 +74,34 @@ unsigned int *startProc(struct process *proc){
  * void init() - The init process from which all other procs branch
  */
 void init(){
+	int r;
 
+	r = fork();
+
+	if (r < 0){
+		/* Fork failed, exit forever*/
+		return;
+	}	
+	else if(r > 0){
+		/* This is our forked process, give it a task */
+		first();
+	}
+	/* else, 0. Continue... */
+
+	r = fork();
+
+	if (r < 0){
+		/* Fork failed, exit forever*/
+		return;
+	}	
+	else if(r > 0){
+		/* This is our forked process, give it a task */
+		second();
+	}
+
+	while(1){};	
+	/* exit init */
+	return;
 }
 
 
@@ -83,13 +109,8 @@ void init(){
 int main(void) {
 	int i;	
 
-	/* Process Table that holds all processes */
-	struct process ptable[TASK_LIMIT];
-	unsigned int stacks[TASK_LIMIT][STACK_SIZE];	
-
 	size_t task_count = 0;
 	size_t current_task = 0;
-
 	
 	*(PIC + VIC_INTENABLE) = PIC_TIMER01;
 
@@ -104,10 +125,7 @@ int main(void) {
 	bwputs("Starting...\n");
 
 	/* In the future, we will start an init process and fork all other code from there */
-	ptable[0].stack = init_task(ptable[0].stack, &first);
-	task_count++;
-	
-	ptable[1].stack = init_task(ptable[1].stack, &second);
+	ptable[task_count].stack = init_task(ptable[task_count].stack, &init);
 	task_count++;
 	
 	while(1) {
@@ -124,15 +142,21 @@ int main(void) {
 					bwputs("Fork Success");
 					/* Compute how much of the stack is used */
 					size_t used = (int) (ptable[current_task].stack + STACK_SIZE
-					              - &stacks[current_task][0]);
+					              - ptable[current_task].stack);
 					/* New stack is END - used */
-					ptable[task_count].stack = stacks[task_count] + STACK_SIZE - used;
+					ptable[task_count].stack = ptable[task_count].stack + STACK_SIZE - used;
 					/* Copy only the used part of the stack */
-					memcpy(stacks[task_count], stacks[current_task],
-					       used*sizeof(stacks[current_task][0]));
+					memcpy(ptable[task_count].stack, ptable[current_task].stack,
+					       used*sizeof(ptable[current_task].stack[0]));
+					
+					/* Copy process values into the new proc */
+					ptable[task_count].state = RUNNABLE;
+					ptable[task_count].pid = task_count;
+					ptable[task_count].parentPid = ptable[current_task].pid; 
+					
 					/* Set return values in each process */
 					ptable[current_task].stack[2+0] = task_count;
-					ptable[task_count].stack[2+0] = 0;
+					ptable[task_count].stack[3+0] = 0;
 					/* There is now one more task */
 					task_count++;
 				}
@@ -140,7 +164,7 @@ int main(void) {
 			default: /* Catch all interrupts */
 				if(*(TIMER0 + TIMER_MIS)) { /* Timer0 went off */
 					*(TIMER0 + TIMER_INTCLR) = 1; /* Clear interrupt */
-					bwputs("\n\ntick!\n\n");
+					bwputs("tick!\n");
 				}
 		}
 
