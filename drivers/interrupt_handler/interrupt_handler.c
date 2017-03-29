@@ -1,9 +1,7 @@
 #include <common.h>
-#include <interrupt.h>
+#include <interrupt_handler.h>
 #include "intc_hw.h"
 
-
-extern void rtc_irq();
 void und_entry() __attribute__((interrupt("UNDEF")));
 void irq_entry() __attribute__((interrupt("IRQ")));
 void fiq_entry() __attribute__((interrupt("FIQ")));

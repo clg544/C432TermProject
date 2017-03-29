@@ -56,49 +56,58 @@ _invalidate_d_cache:
     mrc p15, 0, r1, c1, c0, 0
     orr r1, r1, #(0x1 << 11)
     mcr p15, 0, r1, c1, c0, 0
+_cstartup:
 
-    /* setup stack pointer */
-    /*
-    ldr sp, =0x4030CDFC
-    sub r1, sp, #STACK_SIZE
-    */
+    ldr r1, =0x4030CDFC 
+    ldr r3, =0x3aa @(938)
 
-    /* save svc */
-    mrs r3, cpsr
-
-    /*
-    mov r2, #0x1b @undef
-    msr cpsr_cxsf, r2
+    mov r0, #0
+    orr r0, r0, #0x12  @IRQ_MODE
+    orr r0, r0, #0xC0 @ disable FIQ and IRQ
+    msr CPSR_c, r0
+   
     mov sp, r1
-    sub r1, sp, #STACK_SIZE
+    sub r1, r1, r3
 
-    mov r2, #0x12 @irq
-    msr cpsr_cxsf, r2
+    mov r0, #0
+    orr r0, r0, #0x11  @FIQ_MODE
+    orr r0, r0, #0xC0 @ disable FIQ and IRQ
+    msr CPSR_c, r0  
+    
     mov sp, r1
-    sub r1, sp, #STACK_SIZE
-    */
+    sub r1, r1, r3
 
-    bic r3, r3, #0x80 /* enable interrupts */
+    mov r0, #0
+    orr r0, r0, #0x17  @ABT_MODE
+    orr r0, r0, #0xC0 @ disable FIQ and IRQ
+    msr CPSR_c, r0  
+     
+    mov sp, r1
+    sub r1, r1, r3
 
-    /* return to svc */
-    msr cpsr_cxsf, r3
+    mov r0, #0
+    orr r0, r0, #0x1b  @UND_MODE
+    orr r0, r0, #0xC0 @ disable FIQ and IRQ
+    msr CPSR_c, r0  
+ 
+    mov sp, r1
+    sub r1, r1, r3
 
-    /*mov r3, r0 */
-    /* zero out bss */
-    /*
-    ldr     r0, =__bss_start__
-    ldr     r1, =__bss_size__
-    add     r1, r0
-    mov     r2, #0
-0:
-    cmp     r0, r1
-    strlt   r2, [r0], #4
-    blt     0b
+    mov r0, #0
+    orr r0, r0, #0x13  @SVC_MODE
+    orr r0, r0, #0xC0 @ disable FIQ and IRQ
+    msr CPSR_c, r0 
 
-    mov     r0, r3
-    */
-    b       main
+    mov sp, r1
 
+    mov r0, #0
+    orr r0, r0, #0x13 @ set SVC mode
+    msr CPSR_c, r0
+    
+    bl main
+
+    .loop: b .loop
+    
 .data
 interrupt_address_table:
 .word 0x00000
