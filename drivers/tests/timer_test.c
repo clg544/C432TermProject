@@ -2,14 +2,11 @@
 #include <timer.h>
 
 unsigned int dmtimer0 = DMTIMER0;
-int light = 0;
 
 void led_blink(){
-    led_on(light + 1);
+    led_on(1);
     TIMER_delay(dmtimer0, 0xFFFF);
-    led_off(light + 1);
-    light += 1;
-    light = light % 4;
+    led_off(1);
 }
 
 

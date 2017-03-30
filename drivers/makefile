@@ -13,19 +13,27 @@
 CROSS_COMPILE = /usr/local/gcc-linaro-6.2.1-2016.11-x86_64_arm-linux-gnueabi/bin/arm-linux-gnueabi-
 CC=$(CROSS_COMPILE)gcc
 OBJCOPY=$(CROSS_COMPILE)objcopy
-LD=$(CROSS_COMPILE)ld
+LD=$(CROSS_COMPILE)ld 
 AS=$(CROSS_COMPILE)as
 
+<<<<<<< HEAD
 # CFLAGS=-std=gnu99 -marm -Wall --pedantic -mfpu=neon -mhard-float -mcpu=cortex-a8 -O0 -nostdlib -nostartfiles -ffreestanding -fstack-usage -Wstack-usage=256
 Kernel=irq_test.elf
+=======
+#CFLAGS=-std=gnu99 -marm -Wall --pedantic -mfpu=neon -mhard-float -mcpu=cortex-a8 -O0 -nostdlib -nostartfiles -ffreestanding -fstack-usage -Wstack-usage=256
+Kernel=uart_test.elf
+>>>>>>> drivers2
 CFLAGS= -Wall -Wextra --pedantic -mcpu=cortex-a8 -mtune=cortex-a8 -march=armv7-a -mlong-calls -fdata-sections -funsigned-char -mfpu=neon -mfloat-abi=softfp 
 LDFLAGS= -e _start -u Entry -u __aeabi_uidiv -u __aeabi_idiv --gc-sections
-Generic= start.o rtc.o gpio.o clock.o timer.o uart.o interrupt_handler.o led.o
+Generic= start gpio clock timer uart interrupt_handler led cm debug aeabi
 PWD=$(shell pwd)
+RELROOT=$(PWD)
 INCLUDE= -I$(PWD)/include/
+OBJECTS=$(PWD)/objects
 export CFLAGS
 export LDFLAGS
 export CC
+export RELROOT
 export INCLUDE
 all: bootable.img cpheader.bin
 	
@@ -40,15 +48,16 @@ bootable.img: gpheader.bin $(Kernel:.elf=.bin)
 rtc.o: rtc.s
 	$(CC) $(CFLAGS) $^ -c
 	
-%.elf: $(Generic) tests 
-	$(LD) $(LDFLAGS) $(Generic) $(patsubst %.elf,%.o,$@) -T memmap.ld -o $@
+%.elf: $(Generic:%=%.a) 
+	$(MAKE) -C ./tests $(patsubst %.elf,%.o,$@) ; \
+	cd ./objects ;\
+	objlist=$$(ls *.o);\
+	$(LD) $(LDFLAGS) $$objlist -T $(RELROOT)/memmap.ld -o $@;\
+	mv ./$@ ../$@;
 %.o: %.s
 	$(CC) $(CFLAGS) $(INCLUDE) -c $^
-%.o: 
-	$(MAKE) $@ -f$(PWD)/generic_makefile -C $(PWD)/$(patsubst %.o,%,$@);\
-	mv $(PWD)/$(patsubst %.o,%,$@)/$@ ./$@ ;
-tests:
-	$(MAKE) -C ./tests
+%.a: 
+	$(MAKE) -f$(PWD)/generic_makefile -C $(PWD)/$(patsubst %.a,%,$@);
 gpheader.bin: gpheader.o
 	$(OBJCOPY) -O binary $^ $@
 cpheader.bin: cpheader.o
@@ -58,6 +67,12 @@ cpheader.bin: cpheader.o
 output: $(Kernel)
 	$(CROSS_COMPILE)objdump -D $(Kernel:.bin=.elf)
 clean:
+<<<<<<< HEAD
 	rm -f *.o *.bin *.elf *.su *.img gpheader.s
+=======
+	cd objects ;\
+	rm *.o;
+	rm *.bin *.elf *.su
+>>>>>>> drivers2
 
 

@@ -1,3 +1,13 @@
+cfiles=$(shell ls *.c 2>/dev/null)
+sfiles=$(shell ls *.s 2>/dev/null)
+objects=$(cfiles:%.c=%.o) $(sfiles:%.s=%.o)
+PWD=$(shell pwd)
+DIRECTORY=$(patsubst $(RELROOT)/%,%,$(PWD))
+TARGETS= $(patsubst %,$(RELROOT)/objects/%,$(objects))
+all: $(TARGETS)
+	
+$(RELROOT)/objects/%.o: %.o
+	cp ./$^ $@
 %.o: %.s
 	$(CC) $(CFLAGS) $(INCLUDE) -c $^
 %.o: %.c
