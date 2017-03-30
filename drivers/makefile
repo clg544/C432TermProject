@@ -16,13 +16,10 @@ OBJCOPY=$(CROSS_COMPILE)objcopy
 LD=$(CROSS_COMPILE)ld 
 AS=$(CROSS_COMPILE)as
 
-<<<<<<< HEAD
-# CFLAGS=-std=gnu99 -marm -Wall --pedantic -mfpu=neon -mhard-float -mcpu=cortex-a8 -O0 -nostdlib -nostartfiles -ffreestanding -fstack-usage -Wstack-usage=256
-Kernel=irq_test.elf
-=======
+
 #CFLAGS=-std=gnu99 -marm -Wall --pedantic -mfpu=neon -mhard-float -mcpu=cortex-a8 -O0 -nostdlib -nostartfiles -ffreestanding -fstack-usage -Wstack-usage=256
 Kernel=uart_test.elf
->>>>>>> drivers2
+
 CFLAGS= -Wall -Wextra --pedantic -mcpu=cortex-a8 -mtune=cortex-a8 -march=armv7-a -mlong-calls -fdata-sections -funsigned-char -mfpu=neon -mfloat-abi=softfp 
 LDFLAGS= -e _start -u Entry -u __aeabi_uidiv -u __aeabi_idiv --gc-sections
 Generic= start gpio clock timer uart interrupt_handler led cm debug aeabi
@@ -67,12 +64,8 @@ cpheader.bin: cpheader.o
 output: $(Kernel)
 	$(CROSS_COMPILE)objdump -D $(Kernel:.bin=.elf)
 clean:
-<<<<<<< HEAD
-	rm -f *.o *.bin *.elf *.su *.img gpheader.s
-=======
 	cd objects ;\
 	rm *.o;
-	rm *.bin *.elf *.su
->>>>>>> drivers2
+	rm *.bin *.elf *.su *.img gpheader.s
 
 
