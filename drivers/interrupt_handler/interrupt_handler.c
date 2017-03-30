@@ -1,6 +1,7 @@
 #include <common.h>
 #include <interrupt_handler.h>
 #include "intc_hw.h"
+#include <led.h>
 
 void und_entry() __attribute__((interrupt("UNDEF")));
 void irq_entry() __attribute__((interrupt("IRQ")));
@@ -51,5 +52,16 @@ void irq_entry() {
             break;
     }
     DEREF(INT_CONTROLLER+INTC_CONTROL) = 1; // clear interrupt
+}
+
+int volatile irq_count = 0;
+
+void rtc_irq(){
+    if (irq_count % 2){
+	led_on(1);
+    } else {
+	led_off(1);
+    }
+    irq_count++;
 }
 
