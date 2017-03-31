@@ -2,6 +2,7 @@
 #include <interrupt_handler.h>
 #include "intc_hw.h"
 #include <led.h>
+#include <timer.h>
 
 void und_entry() __attribute__((interrupt("UNDEF")));
 void irq_entry() __attribute__((interrupt("IRQ")));
@@ -25,7 +26,8 @@ void set_mir_line(int i){
 void irq_init() {
     DEREF(INT_CONTROLLER+INTC_SYSCONFIG) = 0x2; /* reset interrupt controller */
     while((DEREF(INT_CONTROLLER+INTC_SYSSTATUS)&0x1) == 0){} /* wait for reset complete */
-    clear_mir_line(75); /* unmask RTC interrupt */
+    /* clear_mir_line(75); #<{(| unmask RTC interrupt |)}># */
+    clear_mir_line(66); /* unmask RTC interrupt */
 
     /* load interrupt sub routines to proper location in RAM */
     DEREF(VECT_UND) = und_entry;
@@ -48,6 +50,9 @@ void irq_entry() {
         case 75: // RTC timer
             rtc_irq();
             break;
+        case 66:
+            rtc_irq();
+            DEREF(DMTIMER0+0x28) |= 0x2; // clear int
         default:
             break;
     }

@@ -1,14 +1,21 @@
 #include "common.h"
 #include "timer.h"
 #include "clock.h"
+#include <led.h>
+
+void wait_for_write(int reg) {
+    if(DEREF(DMTIMER0+TSICR)&0x4) {
+        while(DEREF(DMTIMER0+TWPS)&reg);
+    }
+}
 
 void TIMER_init(int timer, unsigned int value, int autoload, int irq_enable) {
     CLOCK_enable_timer_clock(timer);
-    TIMER_set_counter(timer, value);
+    TIMER_set_counter_ms(timer, value);
     TIMER_auto_reload(timer, autoload);
     /* if(1 == irq_enable) { */
         DEREF(DMTIMER0+IRQENABLE_SET) = 0x2;
-        DEREF(INTC + INTC_MIR_CLEAR2) |= 1<<11;
+        /* DEREF(INTC + INTC_MIR_CLEAR2) |= 1<<11; */
     /* } */
 }
 
@@ -20,10 +27,14 @@ void TIMER_init(int timer, unsigned int value, int autoload, int irq_enable) {
 void TIMER_set_counter(int timer, unsigned int value) {
     switch(timer) {
         case 0:
+            wait_for_write(W_PEND_TCRR);
             DEREF(DMTIMER0 + TCRR) = 0xFFFFFFFF - value;
+            wait_for_write(W_PEND_TLDR);
+            DEREF(DMTIMER0 + TLDR) = 0xFFFFFFFF - value;
             break;
         case 2:
             DEREF(DMTIMER2 + TCRR) = 0xFFFFFFFF - value;
+            DEREF(DMTIMER2 + TLDR) = 0xFFFFFFFF - value;
             break;
         default:
             break;
@@ -34,7 +45,10 @@ void TIMER_set_counter_ms(int timer, unsigned int miliseconds) {
     unsigned int value = 31*miliseconds;
     /* switch(timer) { */
     /*     case 0: */
+            wait_for_write(W_PEND_TCRR);
             DEREF(DMTIMER0 + TCRR) = 0xFFFFFFFF - value;
+            wait_for_write(W_PEND_TLDR);
+            DEREF(DMTIMER0 + TLDR) = 0xFFFFFFFF - value;
     /*         break; */
     /*     case 2: */
     /*         DEREF(DMTIMER2 + TCRR) = 0xFFFFFFFF - value; */
@@ -47,10 +61,14 @@ void TIMER_set_counter_ms(int timer, unsigned int miliseconds) {
 void TIMER_auto_reload(int timer, int autoload) {
     switch(timer) {
         case 0:
-            if (autoload)
+            if (autoload) {
+                wait_for_write(W_PEND_TCLR);
                 DEREF(DMTIMER0 + TCLR) |= 0x2; /* AR bit 1 */
-            else
+            }
+            else {
+                wait_for_write(W_PEND_TCLR);
                 DEREF(DMTIMER0 + TCLR) &= ~0x2; /* AR bit 1 */
+            }
             break;
         case 2:
             if (autoload)
@@ -66,6 +84,7 @@ void TIMER_auto_reload(int timer, int autoload) {
 void TIMER_start(int timer) {
     switch(timer) {
         case 0:
+            wait_for_write(W_PEND_TCLR);
             DEREF(DMTIMER0 + TCLR) |= 0x1; /* ST bit 0 */
             break;
         case 2:
@@ -79,6 +98,7 @@ void TIMER_start(int timer) {
 void TIMER_stop(int timer) {
     switch(timer) {
         case 0:
+            wait_for_write(W_PEND_TCLR);
             DEREF(DMTIMER0 + TCLR) &= ~0x1; /* ST bit 0 */
             break;
         case 2:

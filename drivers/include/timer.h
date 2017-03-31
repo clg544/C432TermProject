@@ -14,7 +14,17 @@
 #define TCRR 0x3C /* Timer Counter Register */
 #define TLDR 0x40 /* Timer Load Register */
 #define TTGR 0x44 /* Timer Trigger Register */
+#define TWPS 0x48 /* Timer write posting bits reg */
+#define TSICR 0x54 /* Timer Synchronous Interface Control reg */
 #define IRQENABLE_SET 0x2C /* Timer Interrupt enable set register*/
+
+/* Write post status */
+#define W_PEND_TCLR 0x0
+#define W_PEND_TCRR 0x1
+#define W_PEND_TLDR 0x2
+#define W_PEND_TTGR 0x3
+#define W_PEND_TMAR 0x4
+
 
 #define MS_TCLR 0x24
 #define MS_CRR  0x28
