@@ -26,8 +26,8 @@ void set_mir_line(int i){
 void irq_init() {
     DEREF(INT_CONTROLLER+INTC_SYSCONFIG) = 0x2; /* reset interrupt controller */
     while((DEREF(INT_CONTROLLER+INTC_SYSSTATUS)&0x1) == 0){} /* wait for reset complete */
-    /* clear_mir_line(75); #<{(| unmask RTC interrupt |)}># */
-    clear_mir_line(66); /* unmask RTC interrupt */
+    clear_mir_line(75); /* unmask RTC interrupt */
+    clear_mir_line(68); /* unmask RTC interrupt */
 
     /* load interrupt sub routines to proper location in RAM */
     DEREF(VECT_UND) = und_entry;
@@ -50,9 +50,9 @@ void irq_entry() {
         case 75: // RTC timer
             rtc_irq();
             break;
-        case 66:
+        case 68:
             rtc_irq();
-            DEREF(DMTIMER0+0x28) |= 0x2; // clear int
+            DEREF(DMTIMER2+0x28) |= 0x2; // clear int
         default:
             break;
     }
@@ -68,5 +68,6 @@ void rtc_irq(){
 	led_off(1);
     }
     irq_count++;
+    DEREF(DMTIMER2+0x28) |= 0x2; // clear int
 }
 
