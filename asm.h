@@ -10,3 +10,7 @@ unsigned int *activate(unsigned int*);
 /* Activate the svc interrupt instruction */
 void syscall(void);	
 int fork(void);	
+int get_pid(void);
+int get_parent_pid(void);
+void exit(void);
+int wait_pid(void);

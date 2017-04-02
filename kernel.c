@@ -60,9 +60,10 @@ unsigned int *startProc(struct process *proc){
 	proc->state = RUNNING;
 
 	/* Activate the process in assembly */
+	/* This only returns because an interrupt or syscall happened. */
 	proc->stack = activate(proc->stack);	
 
-	/* States don't influence anything yet */
+	/* States do influence stuff now */
 	proc->state = RUNNABLE;
 
 	/* Return with the interrupt code on the stack */
@@ -82,11 +83,11 @@ void init(){
 		/* Fork failed, exit forever*/
 		return;
 	}	
-	else if(r > 0){
+	else if(r == 0){
 		/* This is our forked process, give it a task */
 		first();
 	}
-	/* else, 0. Continue... */
+	/* r contains the pid of the forked child. Continue... */
 
 	r = fork();
 
@@ -94,7 +95,7 @@ void init(){
 		/* Fork failed, exit forever*/
 		return;
 	}	
-	else if(r > 0){
+	else if(r == 0){
 		/* This is our forked process, give it a task */
 		second();
 	}
@@ -124,7 +125,7 @@ int main(void) {
 
 	bwputs("Starting...\n");
 
-	/* In the future, we will start an init process and fork all other code from there */
+	/* Start an init process which will fork all other processes */
 	ptable[task_count].stack = init_task(ptable[task_count].stack, &init);
 	task_count++;
 	
@@ -132,6 +133,37 @@ int main(void) {
 		ptable[current_task].stack = startProc(&(ptable[current_task]));
 
 		switch(ptable[current_task].stack[2+7]) {
+		    case 0x5: /* wait_pid */
+		        /* This implementation waits for *any* child to exit. */
+		        /* TODO: take pid as arg, and exit() will only wake this task up if the corresponding pid exits. */
+		        /* The return value is set by the exit() call. The exit() call takes care of waking this parent up. */
+                ptable[current_task].state = SLEEPING;
+                break;
+		    case 0x4: /* exit */
+		        task_count--;
+		        ptable[current_task].state = EXITED;
+		        /* Return this tasks exit-code to parent. */
+		        /* TODO: Should return the argument to exit (which is the tasks exit-code). Default 0 for now. */
+                ptable[ptable[current_task].parentPid].stack[2+0] = 0;
+                /* Wake up parent if it is sleeping because of wait_pid (currently the only way to sleep) */
+                /* TODO: Only wake it up if it is waiting for *this* pid to exit. */
+                if(ptable[ptable[current_task].parentPid].state == SLEEPING){ /* && parent.wait_pid == current_task */
+                    ptable[ptable[current_task].parentPid].state = RUNNABLE;
+                }
+                /* Re-assign orphaned children to their grandparent. */
+                for(int p = 0; p < task_count; p++){
+                    if(ptable[p].parentPid == current_task){
+                        ptable[p].parentPid = ptable[current_task].parentPid;
+                    }
+                }
+                break;
+            case 0x3: /* get_parent_pid */
+                ptable[current_task].stack[2+0] = ptable[current_task].parentPid;
+		        break;
+		    case 0x2: /* get_pid */
+		           /* Could technically just be = current_task; */
+		        ptable[current_task].stack[2+0] = ptable[current_task].pid;
+		        break;
 			case 0x1: /* fork */
 				bwputs("fork...");
 				if(task_count == TASK_LIMIT) {
@@ -168,8 +200,9 @@ int main(void) {
 				}
 		}
 
-		current_task++;
-		if(current_task >= task_count) current_task = 0;
+        /* This is technically our scheduler: skip over sleeping or exited processes to find a RUNNABLE one. */
+        /* this is also where scheduler() should run. It needs to return a pid that it has selected to run */
+        while( ptable[current_task = (current_task+1) % task_count].state != RUNNABLE );
 	}
 	
 	return 0;
