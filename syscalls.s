@@ -32,8 +32,8 @@ get_parent_pid:
 	pop {r7}
 	bx lr
 
-.global exit
-exit:
+.global end
+end:
 	push {r7}
 	mov r7, #0x4
 	svc 0

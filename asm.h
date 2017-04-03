@@ -12,5 +12,5 @@ void syscall(void);
 int fork(void);	
 int get_pid(void);
 int get_parent_pid(void);
-void exit(void);
+int end(void);
 int wait_pid(void);
