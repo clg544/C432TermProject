@@ -151,7 +151,6 @@ int main(void) {
                 ptable[current_task].state = SLEEPING;
                 break;
             case 0x4: /* end */
-		/* TODO: This makes task count irrellevent, can't rely on linearity */
                 task_count--;
                 ptable[current_task].state = EXITED;
                 /* Return this tasks exit-code to parent. */
@@ -163,7 +162,7 @@ int main(void) {
                     ptable[ptable[current_task].parentPid].state = RUNNABLE;
                 }
                 /* Re-assign orphaned children to their grandparent. */
-                for(p = 0; p < task_count; p++){
+                for(p = 0; p < TASK_LIMIT; p++){
                     if(ptable[p].parentPid == current_task){
                         ptable[p].parentPid = ptable[current_task].parentPid;
                     }
@@ -187,20 +186,33 @@ int main(void) {
                     /* Compute how much of the stack is used */
                     size_t used = (int) (ptable[current_task].stack + STACK_SIZE
                                   - ptable[current_task].stack);
+                    /* Find a free proc to store new process: as long as task_count < TASK_LIMIT this should find a free proc. */
+                    for(p = 0; p < TASK_LIMIT; p++){
+                        if(ptable[p].state == UNUSED || ptable[p].state == EXITED){
+                            break;
+                        }
+                    }
+                    /* We were somehow unable to find a free proc to use. This case likely indicates an implementation error in one of our syscalls. */
+                    if(p == TASK_LIMIT){
+                        bwputs("Fork Failed.\n"); 
+                        /* Cannot create a new task, return error */
+                        ptable[current_task].stack[2+0] = -1;
+                        break;
+                    }
+                    /* p now points to a free proc struct ready to be used. */
                     /* New stack is END - used */
-                    ptable[task_count].stack = ptable[task_count].stack + STACK_SIZE - used;
+                    ptable[p].stack = ptable[p].stack + STACK_SIZE - used;
                     /* Copy only the used part of the stack */
-                    memcpy(ptable[task_count].stack, ptable[current_task].stack,
+                    memcpy(ptable[p].stack, ptable[current_task].stack,
                            used*sizeof(ptable[current_task].stack[0]));
-                    
                     /* Copy process values into the new proc */
-                    ptable[task_count].state = RUNNABLE;
-                    ptable[task_count].pid = task_count;
-                    ptable[task_count].parentPid = ptable[current_task].pid; 
+                    ptable[p].state = RUNNABLE;
+                    ptable[p].pid = p; /* this makes a processe's pid match its index into the ptable. */
+                    ptable[p].parentPid = ptable[current_task].pid; 
                     
                     /* Set return values in each process */
-                    ptable[current_task].stack[2+0] = task_count;
-                    ptable[task_count].stack[3+0] = 0;
+                    ptable[current_task].stack[2+0] = p;
+                    ptable[p].stack[3+0] = 0;
                     /* There is now one more task */
                     task_count++;
                 }
@@ -216,11 +228,10 @@ int main(void) {
         /* this is also where scheduler() should run. It needs to return a pid that it has selected to run */
         do{ 
             current_task++;
-            if(current_task >= task_count){
+            if(current_task >= TASK_LIMIT){
                 current_task = 0;
             }
-        } 
-	while(ptable[current_task].state != RUNNABLE);
+        }while(ptable[current_task].state != RUNNABLE);
     }
     
     return 0;
