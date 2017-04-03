@@ -108,6 +108,14 @@ void init(){
 }
 
 
+/*
+ * int scheduler() - Choose the next process to run, return it's index in the
+ * ptable
+ */
+int scheduler() {
+   
+}
+
 
 int main(void) {
     int i;  
