@@ -109,11 +109,24 @@ void init(){
 
 
 /*
- * int scheduler() - Choose the next process to run, return it's index in the
- * ptable
+ * int scheduler() - Choose the next process to run, return its' pid
+ * Want to track what the previous process was? May or may not be useful
+ *  - pid instead of index?
+ * Start from index 1 of the ptable and loops over the ptable looking for the
+ * next runnable process. Can't be negative
  */
 int scheduler() {
-   
+    int next_task = 0;
+    do{ 
+        next_task++;
+        if(next_task >= TASK_LIMIT){
+            next_task = 0;
+        }
+    }while(ptable[next_task].state != RUNNABLE);
+    /* Possible bug here if pids are being manually changed in main to match
+     * the index of the process in the ptable
+     */
+    return ptable[next_task].pid;
 }
 
 
@@ -226,12 +239,7 @@ int main(void) {
 
         /* This is technically our scheduler: skip over sleeping or exited processes to find a RUNNABLE one. */
         /* this is also where scheduler() should run. It needs to return a pid that it has selected to run */
-        do{ 
-            current_task++;
-            if(current_task >= TASK_LIMIT){
-                current_task = 0;
-            }
-        }while(ptable[current_task].state != RUNNABLE);
+        current_task = scheduler();
     }
     
     return 0;
