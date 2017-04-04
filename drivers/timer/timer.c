@@ -14,7 +14,7 @@ void TIMER_init(int timer, unsigned int value, int autoload, int irq_enable) {
     TIMER_set_counter_ms(timer, value);
     TIMER_auto_reload(timer, autoload);
     /* if(1 == irq_enable) { */
-        DEREF(DMTIMER0+IRQENABLE_SET) = 0x2;
+        DEREF(DMTIMER2+IRQENABLE_SET) = 0x2;
         /* DEREF(INTC + INTC_MIR_CLEAR2) |= 1<<11; */
     /* } */
 }

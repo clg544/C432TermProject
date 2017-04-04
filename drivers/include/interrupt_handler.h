@@ -20,6 +20,14 @@ extern "C" {
     
 #define INT_CONTROLLER    0x48200000
 
+#define INTC_SYSCONFIG 0x10
+#define INTC_SYSSTATUS 0x14
+#define INTC_SIR_IRQ 0x40
+#define INTC_SIR_FIQ 0x44
+#define INTC_CONTROL 0x48
+#define INTC_MIR_CLEAR(x) (0x88+((x)*0x20))
+#define INTC_MIR_SET(x) (0x8c + ((x)*0x20))
+
 #define VECT_UND 0x4030CE24 /* undefined instruction RAM exception vector */
 #define VECT_IRQ 0x4030CE38 /* IRQ RAM exception vector */
 #define VECT_FIQ 0x4030CE3C

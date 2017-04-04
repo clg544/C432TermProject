@@ -11,7 +11,6 @@
 #include <dmtimer.h>
 #include <soc_AM335x.h>
 #include <beaglebone.h>
-#include <interrupt.h>
 
 #define TIMER_INITIAL_COUNT (0xFF000000u)
 #define TIMER_RLD_COUNT (0xFF000000u)
@@ -30,13 +29,8 @@ extern void rtc_init();
 int main() {
     /* int i; */
     led_init();
-    /* irq_init(); */
+    irq_init();
     DMTimer2ModuleClkConfig();
-    IntMasterIRQEnable();
-    IntAINTCInit();
-    IntRegister(SYS_INT_TINT2, rtc_irq);
-    IntPrioritySet(SYS_INT_TINT2, 0, AINTC_HOSTINT_ROUTE_IRQ);
-    IntSystemEnable(SYS_INT_TINT2);
     DMTimerCounterSet(SOC_DMTIMER_2_REGS, TIMER_INITIAL_COUNT);
     DMTimerReloadSet(SOC_DMTIMER_2_REGS, TIMER_RLD_COUNT);
     DMTimerModeConfigure(SOC_DMTIMER_2_REGS, DMTIMER_AUTORLD_NOCMP_ENABLE);

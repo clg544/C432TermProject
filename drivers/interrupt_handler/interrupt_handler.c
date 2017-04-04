@@ -1,6 +1,6 @@
 #include <common.h>
 #include <interrupt_handler.h>
-#include "intc_hw.h"
+/* #include "intc_hw.h" */
 #include <led.h>
 #include <timer.h>
 
