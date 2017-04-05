@@ -82,9 +82,8 @@ void init(){
     if (r < 0){
         /* Fork failed, exit forever*/
         return;
-    }
-    /* Kernel crash if ==, bad stack handling somewhere... */   
-    else if(r > 0){
+    }   
+    else if(r == 0){
         /* This is our forked process, give it a task */
         first();
     }
@@ -95,9 +94,8 @@ void init(){
     if (r < 0){
         /* Fork failed, exit forever*/
         return;
-    }
-    /* Kernel crash if ==, bad stack handling somewhere... */   
-    else if(r > 0){
+    }   
+    else if(r == 0){
         /* This is our forked process, give it a task */
         second();
     }
@@ -143,7 +141,6 @@ int main(void) {
                 ptable[current_task].state = SLEEPING;
                 break;
             case 0x4: /* end */
-		/* TODO: This makes task count irrellevent, can't rely on linearity */
                 task_count--;
                 ptable[current_task].state = EXITED;
                 /* Return this tasks exit-code to parent. */
