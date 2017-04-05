@@ -7,7 +7,20 @@ int main() {
 
     struct device *led = get_device(LED);
     struct device *serial = get_device(SERIAL);
+
+    led->open();
     led->write(5);
+    serial->open();
+    serial->write('a');
+    serial->write('a');
+    serial->write('a');
+    serial->write('a');
+    serial->write('a');
+    serial->write('a');
+    serial->write('a');
+    serial->write('a');
+    serial->write('a');
+    serial->write('a');
     serial->write('a');
 
     while(1) {
