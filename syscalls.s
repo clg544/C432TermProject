@@ -47,3 +47,11 @@ wait_pid:
 	svc 0
 	pop {r7}
 	bx lr
+
+.global print
+print:
+	push {r7}
+	mov r7, #0x6
+	svc 0
+	pop {r7}
+	bx lr

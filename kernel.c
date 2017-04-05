@@ -45,12 +45,12 @@ void bwputs(char* s){
  */
 void first(void) {
     while(1) {
-        bwputs("First!\n");
+        print("First!\n");
     }
 }
 void second(void) {
     while(1) {
-        bwputs("Second!\n");
+        print("Second!\n");
     }
 }
 
@@ -130,6 +130,7 @@ int scheduler(int cur_task) {
 int main(void) {
     int i;  
     size_t p;
+    char* s;
 
     size_t task_count = 0;
     size_t current_task = 0;
@@ -154,7 +155,14 @@ int main(void) {
         ptable[current_task].stack = startProc(&(ptable[current_task]));
 
         switch(ptable[current_task].stack[2+7]) {
-            case 0x5: /* wait_pid */
+	    case 0x6: /* print */
+		/* Our string is on the stack, behind a return address */
+		s = (char*)(ptable[current_task].stack[2]);
+		/* Parse the string one letter at a time */ 
+	        bwputs(s);
+		ptable[current_task].stack[2+0] = 0;
+	        break;	
+	    case 0x5: /* wait_pid */
                 /* This implementation waits for *any* child to exit. */
                 /* TODO: take pid as arg, and exit() will only wake this 
 		 * task up if the corresponding pid exits. */
@@ -234,15 +242,14 @@ int main(void) {
                     *(TIMER0 + TIMER_INTCLR) = 1; /* Clear interrupt */
                     bwputs("tick!\n");
                 }
-        }
-
-        /* This is technically our scheduler: skip over sleeping or exited 
-	 * processes to find a RUNNABLE one. */
-        /* this is also where scheduler() should run. It needs to return a 
-	 * pid that it has selected to run */
-        current_task = scheduler(current_task);
-    }
-    
+   		/* This is technically our scheduler: skip over sleeping or exited 
+                 * processes to find a RUNNABLE one. */
+                /* this is also where scheduler() should run. It needs to return a 
+	         * pid that it has selected to run */
+                current_task = scheduler(current_task);
+	        break;
+            }
+   	}
     return 0;
 }
 
