@@ -9,39 +9,64 @@
 # You may have to send it a few times for it to work
 #
 # TODO default to Ubuntu's tool chain name instead of Arch's
+.PHONY: tests
+# CROSS_COMPILE = /usr/local/gcc-linaro-6.2.1-2016.11-x86_64_arm-linux-gnueabi/bin/arm-linux-gnueabi-
 CROSS_COMPILE = arm-none-eabi-
 CC=$(CROSS_COMPILE)gcc
 OBJCOPY=$(CROSS_COMPILE)objcopy
-LD=$(CROSS_COMPILE)ld
+LD=$(CROSS_COMPILE)ld 
 AS=$(CROSS_COMPILE)as
 
-CFLAGS=-std=gnu99 -Wall --pedantic -mfpu=neon -mhard-float -mcpu=cortex-a8
-LDFLAGS=
 
-all: led_test.bin
+#CFLAGS=-std=gnu99 -marm -Wall --pedantic -mfpu=neon -mhard-float -mcpu=cortex-a8 -O0 -nostdlib -nostartfiles -ffreestanding -fstack-usage -Wstack-usage=256
+Kernel=irq_test.elf
 
-.SUFFIXES: .c .o
-.c.o:
-	$(CC) $(CFLAGS) -o $@ -c $^
+CFLAGS= -Wall -Wextra --pedantic -mcpu=cortex-a8 -mtune=cortex-a8 -march=armv7-a -mlong-calls -fdata-sections -funsigned-char -mfpu=neon -mfloat-abi=softfp 
+LDFLAGS= -e _start -u Entry -u __aeabi_uidiv -u __aeabi_idiv --gc-sections
+Generic= start gpio clock timer uart interrupt_handler led cm debug aeabi
+PWD=$(shell pwd)
+RELROOT=$(PWD)
+INCLUDE= -I$(PWD)/include/
+OBJECTS=$(PWD)/objects
+export CFLAGS
+export LDFLAGS
+export CC
+export RELROOT
+export INCLUDE
+all: bootable.img cpheader.bin
+	
+gpheader.s: $(Kernel:.elf=.bin)
+	FILESIZE=$$(stat -c%s "$(Kernel:.elf=.bin)") ;\
+	echo ".data" | cat > gpheader.s ;\
+	echo ".word $$FILESIZE" | cat >> gpheader.s ;\
+	echo ".word 0x402F0400" | cat >> gpheader.s ;
+bootable.img: gpheader.bin $(Kernel:.elf=.bin)
+	cat gpheader.bin $(Kernel:.elf=.bin) > bootable.img
 
-start.o: start.s
-	$(AS) -mfpu=neon start.s -o start.o
-
-led_test.bin: led_test.o start.o gpio.o clock.o
-	$(LD) start.o gpio.o clock.o led_test.o -T memmap.ld -o led_test.elf
-	$(OBJCOPY) led_test.elf led_test.bin -O binary
-
-timer_test.bin: timer_test.o start.o gpio.o clock.o timer.o
-	$(LD) start.o timer.o gpio.o clock.o timer_test.o -T memmap.ld -o timer_test.elf
-	$(OBJCOPY) timer_test.elf timer_test.bin -O binary
-
-uart_test.bin: uart_test.o start.o gpio.o clock.o uart.o
-	$(LD) $(LDFLAGS) start.o uart.o gpio.o clock.o uart_test.o -T memmap.ld -o uart_test.elf
-	$(OBJCOPY) uart_test.elf uart_test.bin -O binary
-
-
-
+rtc.o: rtc.s
+	$(CC) $(CFLAGS) $^ -c
+	
+%.elf: $(Generic:%=%.a) 
+	$(MAKE) -C ./tests $(patsubst %.elf,%.o,$@) ; \
+	cd ./objects ;\
+	objlist=$$(ls *.o);\
+	$(LD) $(LDFLAGS) $$objlist -T $(RELROOT)/memmap.ld -o $@;\
+	mv ./$@ ../$@;
+%.o: %.s
+	$(CC) $(CFLAGS) $(INCLUDE) -c $^
+%.a: 
+	$(MAKE) -f$(PWD)/generic_makefile -C $(PWD)/$(patsubst %.a,%,$@);
+gpheader.bin: gpheader.o
+	$(OBJCOPY) -O binary $^ $@
+cpheader.bin: cpheader.o
+	$(OBJCOPY) -O binary $^ $@
+%.bin: %.elf
+	$(OBJCOPY) -O binary $^ $@
+output: $(Kernel)
+	$(CROSS_COMPILE)objdump -D $(Kernel:.bin=.elf)
 clean:
-	rm *.o *.bin *.elf
+	cd objects ;\
+	rm *.o;
+	rm *.bin *.elf *.su *.img gpheader.s
 
 
