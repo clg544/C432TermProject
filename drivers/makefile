@@ -19,11 +19,11 @@ AS=$(CROSS_COMPILE)as
 
 
 #CFLAGS=-std=gnu99 -marm -Wall --pedantic -mfpu=neon -mhard-float -mcpu=cortex-a8 -O0 -nostdlib -nostartfiles -ffreestanding -fstack-usage -Wstack-usage=256
-Kernel=irq_test.elf
+Kernel=hal_test.elf
 
 CFLAGS= -Wall -Wextra --pedantic -mcpu=cortex-a8 -mtune=cortex-a8 -march=armv7-a -mlong-calls -fdata-sections -funsigned-char -mfpu=neon -mfloat-abi=softfp 
 LDFLAGS= -e _start -u Entry -u __aeabi_uidiv -u __aeabi_idiv --gc-sections
-Generic= start gpio clock timer uart interrupt_handler led cm debug aeabi
+Generic= start gpio clock timer uart interrupt_handler led cm debug aeabi HAL
 PWD=$(shell pwd)
 RELROOT=$(PWD)
 INCLUDE= -I$(PWD)/include/
