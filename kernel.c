@@ -157,19 +157,24 @@ int main(void) {
         switch(ptable[current_task].stack[2+7]) {
             case 0x5: /* wait_pid */
                 /* This implementation waits for *any* child to exit. */
-                /* TODO: take pid as arg, and exit() will only wake this task up if the corresponding pid exits. */
-                /* The return value is set by the exit() call. The exit() call takes care of waking this parent up. */
+                /* TODO: take pid as arg, and exit() will only wake this 
+		 * task up if the corresponding pid exits. */
+                /* The return value is set by the exit() call. 
+		 * The exit() call takes care of waking this parent up. */
                 ptable[current_task].state = SLEEPING;
                 break;
             case 0x4: /* end */
                 task_count--;
                 ptable[current_task].state = EXITED;
                 /* Return this tasks exit-code to parent. */
-                /* TODO: Should return the argument to exit (which is the tasks exit-code). Default 0 for now. */
+                /* TODO: Should return the argument to exit (which is the 
+		 * tasks exit-code). Default 0 for now. */
                 ptable[ptable[current_task].parentPid].stack[2+0] = 0;
-                /* Wake up parent if it is sleeping because of wait_pid (currently the only way to sleep) */
+                /* Wake up parent if it is sleeping because of wait_pid 
+		 * (currently the only way to sleep) */
                 /* TODO: Only wake it up if it is waiting for *this* pid to exit. */
-                if(ptable[ptable[current_task].parentPid].state == SLEEPING){ /* && parent.wait_pid == current_task */
+                if(ptable[ptable[current_task].parentPid].state == SLEEPING){ 
+		    /* && parent.wait_pid == current_task */
                     ptable[ptable[current_task].parentPid].state = RUNNABLE;
                 }
                 /* Re-assign orphaned children to their grandparent. */
@@ -197,13 +202,15 @@ int main(void) {
                     /* Compute how much of the stack is used */
                     size_t used = (int) (ptable[current_task].stack + STACK_SIZE
                                   - ptable[current_task].stack);
-                    /* Find a free proc to store new process: as long as task_count < TASK_LIMIT this should find a free proc. */
+                    /* Find a free proc to store new process: as long as 
+		     * task_count < TASK_LIMIT this should find a free proc. */
                     for(p = 0; p < TASK_LIMIT; p++){
                         if(ptable[p].state == UNUSED || ptable[p].state == EXITED){
                             break;
                         }
                     }
-                    /* We were somehow unable to find a free proc to use. This case likely indicates an implementation error in one of our syscalls. */
+                    /* We were somehow unable to find a free proc to use. This case 
+		     * likely indicates an implementation error in one of our syscalls. */
                     if(p == TASK_LIMIT){
                         bwputs("Fork Failed.\n"); 
                         /* Cannot create a new task, return error */
@@ -218,7 +225,8 @@ int main(void) {
                            used*sizeof(ptable[current_task].stack[0]));
                     /* Copy process values into the new proc */
                     ptable[p].state = RUNNABLE;
-                    ptable[p].pid = p; /* this makes a processe's pid match its index into the ptable. */
+                    ptable[p].pid = p; /* this makes a processe's pid match its 
+		                        * index into the ptable. */
                     ptable[p].parentPid = ptable[current_task].pid; 
                     
                     /* Set return values in each process */
@@ -235,8 +243,10 @@ int main(void) {
                 }
         }
 
-        /* This is technically our scheduler: skip over sleeping or exited processes to find a RUNNABLE one. */
-        /* this is also where scheduler() should run. It needs to return a pid that it has selected to run */
+        /* This is technically our scheduler: skip over sleeping or exited 
+	 * processes to find a RUNNABLE one. */
+        /* this is also where scheduler() should run. It needs to return a 
+	 * pid that it has selected to run */
         current_task = scheduler();
     }
     
