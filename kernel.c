@@ -6,9 +6,10 @@
 #include "proc.h"
 
 unsigned int *init_task(unsigned int* stack, void (*start)(void)) {
-    stack += STACK_SIZE - 16; /* End of stack, minus what we're about to push */
+    stack += STACK_SIZE - 24; /* End of stack, minus what we're about to push */
     stack[0] = 0x10; /* User mode, interrupts on */
     stack[1] = (unsigned int)start;
+    stack[2] = 0;  /* Emulate Fork */
     return stack;
 }
 
@@ -82,10 +83,10 @@ void init(){
         /* Fork failed, exit forever*/
         return;
     }   
-    else if(r > 0){
+    else if(r == 0){
         /* This is our forked process, give it a task */
         first();
-    	end();
+        end();
     }
 
     /* r contains the pid of the forked child. Continue... */
@@ -94,12 +95,13 @@ void init(){
         /* Fork failed, exit forever*/
         return;
     }   
-    else if(r > 0){
+    else if(r == 0){
         /* This is our forked process, give it a task */
         second();
-	end();
+        end();
     }
-    
+   
+
     /* exit init */
     end(); 
     return;
@@ -146,8 +148,8 @@ int main(void) {
 
     /* Start an init process which will fork all other processes */
     ptable[task_count].stack = init_task(ptable[task_count].stack, &init);
+    ptable[task_count].state = RUNNABLE;
     task_count++;
-    
     while(1) {
         ptable[current_task].stack = startProc(&(ptable[current_task]));
 
@@ -221,8 +223,8 @@ int main(void) {
                     ptable[p].parentPid = ptable[current_task].pid; 
                     
                     /* Set return values in each process */
-                    ptable[current_task].stack[2+0] = (int)p;
-                    ptable[p].stack[3+0] = 0;
+                    ptable[current_task].stack[2+0] = p;
+                    ptable[p].stack[2+0] = 0;
                     /* There is now one more task */
                     task_count++;
                 }
