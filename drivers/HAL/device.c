@@ -49,7 +49,7 @@ int led_write(unsigned int byte) {
 
 
 void enumerate_devices() {
-    UART_Init(UART_PORT0);
+    UART_Init(0);
     devices[0].type = SERIAL;
     devices[0].write = uart_write;
     devices[0].read = uart_read;
@@ -71,11 +71,11 @@ void enumerate_devices() {
 /* I would like to change the integer dev
  * to a string to make this function easier to use.
  */
-struct device *get_device(int dev) {
-    if(dev == 0) {
-        return &devices[0];
-    } else if(dev == 1) {
-        return &devices[1];
+struct device *get_device(enum device_type dev) {
+    if(dev == SERIAL) {
+        return &devices[SERIAL];
+    } else if(dev == LED) {
+        return &devices[LED];
     } else {
         return 0;
     }

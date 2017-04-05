@@ -36,7 +36,7 @@ void enumerate_devices();
 /* returns the device instance
  * corresponding to the device name.
  */
-struct device *get_device(int dev);
+struct device *get_device(enum device_type dev);
 
 
 #endif
