@@ -72,13 +72,12 @@ unsigned int *startProc(struct process *proc){
 
 
 /**
- * void init() - The init process from which all other procs branch
+ * void init() - User mode process from which all other procs branch
  */
 void init(){
     int r;
 
     r = fork();
-
     if (r < 0){
         /* Fork failed, exit forever*/
         return;
@@ -86,11 +85,11 @@ void init(){
     else if(r > 0){
         /* This is our forked process, give it a task */
         first();
+    	end();
     }
+
     /* r contains the pid of the forked child. Continue... */
-
     r = fork();
-
     if (r < 0){
         /* Fork failed, exit forever*/
         return;
@@ -98,10 +97,11 @@ void init(){
     else if(r > 0){
         /* This is our forked process, give it a task */
         second();
+	end();
     }
-
-    while(1){}; 
+    
     /* exit init */
+    end(); 
     return;
 }
 
@@ -120,9 +120,7 @@ int scheduler(int cur_task) {
             cur_task = 0;
         }
     }while(ptable[cur_task].state != RUNNABLE);
-    /* Possible bug here if pids are being manually changed in main to match
-     * the index of the process in the ptable
-     */
+    
     return cur_task;
 }
 
@@ -165,11 +163,8 @@ int main(void) {
             case 0x4: /* end */
                 task_count--;
                 ptable[current_task].state = EXITED;
-                /* Return this tasks exit-code to parent. */
-                /* TODO: Should return the argument to exit (which is the 
-		 * tasks exit-code). Default 0 for now. */
-                ptable[ptable[current_task].parentPid].stack[2+0] = 0;
-                /* Wake up parent if it is sleeping because of wait_pid 
+                
+		/* Wake up parent if it is sleeping because of wait_pid 
 		 * (currently the only way to sleep) */
                 /* TODO: Only wake it up if it is waiting for *this* pid to exit. */
                 if(ptable[ptable[current_task].parentPid].state == SLEEPING){ 
@@ -191,23 +186,20 @@ int main(void) {
                 ptable[current_task].stack[2+0] = ptable[current_task].pid;
                 break;
             case 0x1: /* fork */
-                bwputs("fork...");
                 if(task_count == TASK_LIMIT) {
-                    bwputs("Fork Failed.\n");
                     /* Cannot create a new task, return error */
                     ptable[current_task].stack[2+0] = -1;
                 } else {
-                    bwputs("Fork Success\n");
                     /* Compute how much of the stack is used */
                     size_t used = (int) (ptable[current_task].stack + STACK_SIZE
                                   - ptable[current_task].stack);
                     /* Find a free proc to store new process: as long as 
 		     * task_count < TASK_LIMIT this should find a free proc. */
-                    for(p = 0; p < TASK_LIMIT; p++){
-                        if(ptable[p].state == UNUSED || ptable[p].state == EXITED){
-                            break;
-                        }
-                    }
+                    p = 0;
+		    while((!(ptable[p].state == UNUSED || ptable[p].state == EXITED)) 
+		             && p < TASK_LIMIT){
+			p++;
+		    }
                     /* We were somehow unable to find a free proc to use. This case 
 		     * likely indicates an implementation error in one of our syscalls. */
                     if(p == TASK_LIMIT){
@@ -229,7 +221,7 @@ int main(void) {
                     ptable[p].parentPid = ptable[current_task].pid; 
                     
                     /* Set return values in each process */
-                    ptable[current_task].stack[2+0] = p;
+                    ptable[current_task].stack[2+0] = (int)p;
                     ptable[p].stack[3+0] = 0;
                     /* There is now one more task */
                     task_count++;
