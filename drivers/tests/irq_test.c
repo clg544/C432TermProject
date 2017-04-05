@@ -8,35 +8,13 @@
 #include <interrupt_handler.h>
 #include <timer.h>
 #include <common.h>
-#include <dmtimer.h>
-#include <soc_AM335x.h>
-#include <beaglebone.h>
 
-#define TIMER_INITIAL_COUNT (0xFF000000u)
-#define TIMER_RLD_COUNT (0xFF000000u)
-/* int volatile irq_count = 0; */
 
-/* void rtc_irq(){ */
-/*     if (irq_count % 2){ */
-/* 	led_on(1); */
-/*     } else { */
-/* 	led_off(1); */
-/*     } */
-/*     irq_count++; */
-/* } */
-
-extern void rtc_init();
 int main() {
-    /* int i; */
     led_init();
     irq_init();
-    DMTimer2ModuleClkConfig();
-    DMTimerCounterSet(SOC_DMTIMER_2_REGS, TIMER_INITIAL_COUNT);
-    DMTimerReloadSet(SOC_DMTIMER_2_REGS, TIMER_RLD_COUNT);
-    DMTimerModeConfigure(SOC_DMTIMER_2_REGS, DMTIMER_AUTORLD_NOCMP_ENABLE);
-    DMTimerIntEnable(SOC_DMTIMER_2_REGS, DMTIMER_INT_OVF_EN_FLAG);
-    DMTimerEnable(SOC_DMTIMER_2_REGS);
-    /* rtc_init(); */
+    TIMER_init(2, 100, 1, 1);
+    TIMER_start(2);
     while(1){
     }
     return 0;

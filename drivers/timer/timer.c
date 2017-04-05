@@ -4,8 +4,8 @@
 #include <led.h>
 
 void wait_for_write(int reg) {
-    if(DEREF(DMTIMER0+TSICR)&0x4) {
-        while(DEREF(DMTIMER0+TWPS)&reg);
+    if(DEREF(DMTIMER2+TSICR)&0x4) {
+        while(DEREF(DMTIMER2+TWPS)&reg);
     }
 }
 
@@ -13,10 +13,9 @@ void TIMER_init(int timer, unsigned int value, int autoload, int irq_enable) {
     CLOCK_enable_timer_clock(timer);
     TIMER_set_counter_ms(timer, value);
     TIMER_auto_reload(timer, autoload);
-    /* if(1 == irq_enable) { */
+    if(1 == irq_enable) {
         DEREF(DMTIMER2+IRQENABLE_SET) = 0x2;
-        /* DEREF(INTC + INTC_MIR_CLEAR2) |= 1<<11; */
-    /* } */
+    }
 }
 
 /* The timer counts upward, which means you have to
@@ -33,7 +32,9 @@ void TIMER_set_counter(int timer, unsigned int value) {
             DEREF(DMTIMER0 + TLDR) = 0xFFFFFFFF - value;
             break;
         case 2:
+            wait_for_write(W_PEND_TCRR);
             DEREF(DMTIMER2 + TCRR) = 0xFFFFFFFF - value;
+            wait_for_write(W_PEND_TCRR);
             DEREF(DMTIMER2 + TLDR) = 0xFFFFFFFF - value;
             break;
         default:
@@ -43,19 +44,20 @@ void TIMER_set_counter(int timer, unsigned int value) {
 
 void TIMER_set_counter_ms(int timer, unsigned int miliseconds) {
     unsigned int value = 31*miliseconds;
-    /* switch(timer) { */
-    /*     case 0: */
+    switch(timer) {
+        case 0:
             wait_for_write(W_PEND_TCRR);
             DEREF(DMTIMER0 + TCRR) = 0xFFFFFFFF - value;
             wait_for_write(W_PEND_TLDR);
             DEREF(DMTIMER0 + TLDR) = 0xFFFFFFFF - value;
-    /*         break; */
-    /*     case 2: */
-    /*         DEREF(DMTIMER2 + TCRR) = 0xFFFFFFFF - value; */
-    /*         break; */
-    /*     default: */
-    /*         break; */
-    /* } */
+            break;
+        case 2:
+            DEREF(DMTIMER2 + TCRR) = 0xFFFFFFFF - value;
+            DEREF(DMTIMER2 + TLDR) = 0xFFFFFFFF - value;
+            break;
+        default:
+            break;
+    }
 }
 
 void TIMER_auto_reload(int timer, int autoload) {
