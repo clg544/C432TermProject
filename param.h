@@ -1,4 +1,4 @@
-#define TASK_LIMIT 3
+#define TASK_LIMIT 10
 #define STACK_SIZE	256
 
 #define NPROC     64         /* maximum number of processes */
