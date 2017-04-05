@@ -17,9 +17,27 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
+    
 void panic();
-void printHex(char* character);
+void printUIntHex(unsigned int character);
+void printUIntHexBigEndian(unsigned int character);
+void printUIntHexLittleEndian(unsigned int character);
+void printUIntBinaryLittleEndian(unsigned int character);
+void printUIntBinaryBigEndian(unsigned int character);
+int checkEndianness();
+char charNum2ascii(char num);
+void terminateLine();
+void dumpFrame(unsigned int * frame);
+
+static inline __attribute__((always_inline)) void* captureFrame() 
+{
+   asm volatile ("str sp,[sp, #-4]");
+   asm volatile ("subs sp, #4");
+   asm volatile ("push {r0-r7, lr}");
+   asm volatile ("mov r0, sp");
+   register int *r0 asm ("r0");
+   return r0;
+}
 
 
 #ifdef __cplusplus

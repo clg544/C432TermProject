@@ -7,11 +7,12 @@
 #include <led.h>
 #include <interrupt_handler.h>
 #include <uart.h>
+#include <debug.h>
 #include <timer.h>
-
 char test[5] = "test";
 
 extern void rtc_init();
+
 int main() {
     /* int i; */
     led_init();
@@ -19,9 +20,8 @@ int main() {
     TIMER_init(2, 100, 1, 1);
     TIMER_start(2);
     UART_Init(0);
-    UART_puts(UART_PORT0, test,4);
-    while(1){
-	UARTCharPut(UART_PORT0, UARTCharGet(UART_PORT0));
-    }
+    asm volatile("eor r0,r0,r0");
+    unsigned int* frame = captureFrame();
+    dumpFrame(frame);
     return 0;
 }

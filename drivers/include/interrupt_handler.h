@@ -27,10 +27,21 @@ extern "C" {
 #define INTC_CONTROL 0x48
 #define INTC_MIR_CLEAR(x) (0x88+((x)*0x20))
 #define INTC_MIR_SET(x) (0x8c + ((x)*0x20))
-
+    
 #define VECT_UND 0x4030CE24 /* undefined instruction RAM exception vector */
+#define VECT_SWI 0x4030CE28
+#define VECT_PRF 0x4030CE2C
+#define VECT_DAB 0x4030CE30
 #define VECT_IRQ 0x4030CE38 /* IRQ RAM exception vector */
 #define VECT_FIQ 0x4030CE3C
+    
+void swi_entry(void) __attribute__((interrupt("SWI")));
+void prf_entry(void) __attribute__((interrupt("ABORT")));
+void dab_entry(void) __attribute__((interrupt("ABORT")));
+void und_entry(void) __attribute__((interrupt("UNDEF")));
+void fiq_entry(void) __attribute__((interrupt("FIQ")));
+void irq_entry(void) __attribute__((interrupt("IRQ")));
+
 
 void svc_entry(void);
 void irq_entry(void);
@@ -38,6 +49,7 @@ void fiq_entry(void);
 
 void irq_init();
 void rtc_irq();
+void dm_irq();
 
 #ifdef __cplusplus
 }

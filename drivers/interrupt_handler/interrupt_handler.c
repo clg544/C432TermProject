@@ -1,12 +1,13 @@
 #include <common.h>
 #include <interrupt_handler.h>
-/* #include "intc_hw.h" */
+#include <debug.h>
 #include <led.h>
 #include <timer.h>
 
-void und_entry() __attribute__((interrupt("UNDEF")));
-void irq_entry() __attribute__((interrupt("IRQ")));
-void fiq_entry() __attribute__((interrupt("FIQ")));
+//char[50] prfAbort = "Pre fetch abort";
+//char dataAbort = "Data abort";
+//char undAbort = "Undefined abort";
+//char swiEntry = "Supervisor Instruction";
 
 void clear_mir_line(int i){
     unsigned int reg = (i + 1) / 32;
@@ -31,18 +32,32 @@ void irq_init() {
 
     /* load interrupt sub routines to proper location in RAM */
     DEREF(VECT_UND) = und_entry;
+    DEREF(VECT_SWI) = swi_entry;
+    DEREF(VECT_PRF) = prf_entry;
+    DEREF(VECT_DAB) = dab_entry;
     DEREF(VECT_IRQ) = irq_entry;
     DEREF(VECT_FIQ) = fiq_entry;
 }
-
+/* system call */
+void swi_entry(){
+    panic();
+}
+/* pre fetch abort */
+void prf_entry(){
+    panic();
+}
+/* data abort */
+void dab_entry(){
+    panic();
+}
 /* undefined instruction */
 void und_entry() {
-    /* empty */
+    panic();
 }
 
 /* undefined instruction */
 void fiq_entry() {
-    /* empty */
+    panic();
 }
 
 void irq_entry() {
@@ -51,23 +66,14 @@ void irq_entry() {
             rtc_irq();
             break;
         case 68:
-            rtc_irq();
+            dm_irq();
             DEREF(DMTIMER2+0x28) |= 0x2; // clear int
+	    break;
         default:
             break;
     }
     DEREF(INT_CONTROLLER+INTC_CONTROL) = 1; // clear interrupt
 }
 
-int volatile irq_count = 0;
 
-void rtc_irq(){
-    if (irq_count % 2){
-	led_on(1);
-    } else {
-	led_off(1);
-    }
-    irq_count++;
-    DEREF(DMTIMER2+0x28) |= 0x2; // clear int
-}
 
