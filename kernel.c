@@ -44,12 +44,12 @@ void bwputs(char* s){
  */
 void first(void) {
     while(1) {
-        bwputs("In first...\n");
+        bwputs("First!\n");
     }
 }
 void second(void) {
     while(1) {
-        bwputs("In second...\n");
+        bwputs("Second!\n");
     }
 }
 
@@ -83,7 +83,7 @@ void init(){
         /* Fork failed, exit forever*/
         return;
     }   
-    else if(r == 0){
+    else if(r > 0){
         /* This is our forked process, give it a task */
         first();
     }
@@ -95,7 +95,7 @@ void init(){
         /* Fork failed, exit forever*/
         return;
     }   
-    else if(r == 0){
+    else if(r > 0){
         /* This is our forked process, give it a task */
         second();
     }
@@ -113,18 +113,17 @@ void init(){
  * Start from index 1 of the ptable and loops over the ptable looking for the
  * next runnable process. Can't be negative
  */
-int scheduler() {
-    int next_task = 0;
+int scheduler(int cur_task) {
     do{ 
-        next_task++;
-        if(next_task >= TASK_LIMIT){
-            next_task = 0;
+        cur_task++;
+        if(cur_task >= TASK_LIMIT){
+            cur_task = 0;
         }
-    }while(ptable[next_task].state != RUNNABLE);
+    }while(ptable[cur_task].state != RUNNABLE);
     /* Possible bug here if pids are being manually changed in main to match
      * the index of the process in the ptable
      */
-    return ptable[next_task].pid;
+    return cur_task;
 }
 
 
@@ -247,7 +246,7 @@ int main(void) {
 	 * processes to find a RUNNABLE one. */
         /* this is also where scheduler() should run. It needs to return a 
 	 * pid that it has selected to run */
-        current_task = scheduler();
+        current_task = scheduler(current_task);
     }
     
     return 0;
