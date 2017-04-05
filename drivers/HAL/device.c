@@ -50,27 +50,24 @@ int led_write(unsigned int byte) {
 
 void enumerate_devices() {
     UART_Init(0);
-    devices[0].type = SERIAL;
-    devices[0].write = uart_write;
-    devices[0].read = uart_read;
-    devices[0].open = default_open;
-    devices[0].close = default_close;
-    devices[0].instance = 0;
+    devices[SERIAL].type = SERIAL;
+    devices[SERIAL].write = uart_write;
+    devices[SERIAL].read = uart_read;
+    devices[SERIAL].open = default_open;
+    devices[SERIAL].close = default_close;
+    devices[SERIAL].instance = 0;
 
     led_init();
-    devices[1].type = LED;
-    devices[1].write = led_write;
-    devices[1].read = default_read;
-    devices[1].open = default_open;
-    devices[1].close = default_close;
-    devices[1].instance = 0;
+    devices[LED].type = LED;
+    devices[LED].write = led_write;
+    devices[LED].read = default_read;
+    devices[LED].open = default_open;
+    devices[LED].close = default_close;
+    devices[LED].instance = 0;
 
 }
 
 
-/* I would like to change the integer dev
- * to a string to make this function easier to use.
- */
 struct device *get_device(enum device_type dev) {
     if(dev == SERIAL) {
         return &devices[SERIAL];
