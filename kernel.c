@@ -157,7 +157,8 @@ void *allocateHeap(size_t size){
     /* Set to first free space variable of the heap */
     i = ptable[current_task].heap;
     next = 0;
-    while (size+header_size < (unsigned int)ptable[current_task].heap - (unsigned int)ptable[current_task].stack){
+    while (size+header_size < (unsigned int)ptable[current_task].heap - 
+                     (unsigned int)ptable[current_task].stack || !((i-2) == 0)){
         /* If the heap is free, and our data will fit, */
         if(*i == 1 && *(i - 1) > size){
             *i = 0;
