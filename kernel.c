@@ -45,14 +45,6 @@ void bwputs(char* s){
  * void first(void) - Simple User program for testing user mode
  */
 void first(void) {
-    char *str;
-
-    bwputs("Enter Malloc\n");
-    str = (char*)memalloc((size_t)13);
-
-    str[0] = 'H';
-
-
     while(1) {
         bwputs(str);
     }
