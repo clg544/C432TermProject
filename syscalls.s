@@ -51,9 +51,15 @@ wait_pid:
 .global print
 print:
 	push {r7}
-	mov r7, #0x4
+	mov r7, #0x6
 	svc 0
 	pop {r7}
 	bx lr
 
-
+.global memalloc
+memalloc:
+        push {r7}
+        mov r7, #0x7
+        svc 0
+        pop {r7}
+        bx lr

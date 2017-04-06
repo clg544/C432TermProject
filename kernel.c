@@ -7,9 +7,10 @@
 #include "malloc.h"
 
 unsigned int *init_task(unsigned int* stack, void (*start)(void)) {
-    stack += STACK_SIZE - 16; /* End of stack, minus what we're about to push */
+    stack += STACK_SIZE - 24; /* End of stack, minus what we're about to push */
     stack[0] = 0x10; /* User mode, interrupts on */
     stack[1] = (unsigned int)start;
+    stack[2] = 0;
     return stack;
 }
 
@@ -44,8 +45,16 @@ void bwputs(char* s){
  * void first(void) - Simple User program for testing user mode
  */
 void first(void) {
+    char *str;
+
+    bwputs("Enter Malloc\n");
+    str = (char*)memalloc((size_t)13);
+
+    str[0] = 'H';
+
+
     while(1) {
-        bwputs("In first...\n");
+        bwputs(str);
     }
 }
 void second(void) {
@@ -106,10 +115,10 @@ void init(){
     return;
 }
 
+/*
 int free(void* mem, size_t current_task){
     size_t *;
 
-    /* Memory bound checking */
     if(mem < ptable[current_task].stack || mem > ptable[current_task].heap){
 	return 0;
     }
@@ -119,7 +128,7 @@ int free(void* mem, size_t current_task){
          
     
 
-}
+}*/
 
 /* Add another allocation to the heap.
  *
@@ -133,35 +142,51 @@ int free(void* mem, size_t current_task){
  * [ ... ]
  * [ endMemory ]
  */
-void *memalloc(size_t size, size_t current_task){
-    size_t *i;
-    header_size = 3;
+void *allocateHeap(size_t size){
+    size_t *i, *next;
+    size_t header_size = 3;
     
     if(size <= 0) return 0;
 
-    if (ptable[current_task].heap - size - header_size) < 
+    if (ptable[current_task].heap - header_size - size < 
 		    ptable[current_task].stack){
+        /* Not enough room */ 
         return 0;
     }
 
+    /* Set to first free space variable of the heap */
     i = ptable[current_task].heap;
+    next = 0;
     while (size+header_size < (unsigned int)ptable[current_task].heap - (unsigned int)ptable[current_task].stack){
+        /* If the heap is free, and our data will fit, */
         if(*i == 1 && *(i - 1) > size){
             *i = 0;
             *(i-1) = size;
+	    next = i - header_size - size;
+            *(i-2) = (size_t) next;
 
-	    if (*(i-2) != 0){
-                i = i - header_size - size;
-		*(i-1) = 1
-	    *(i-2) = *i - size - header_size - 1;
-	    
-	    i = i - header_size - size;
+	    if(*(i-2) == 0){
+		/* Point to new node */
+		*(i-2) = (size_t)next;
 
-	    *(i-1) 
-	    return i + header_size + ;
+                *next = 1;
+		*(next-1) = *(i-2) - (unsigned int)ptable[current_task].stack;
+		*(next-2) = 0;
+            }
+	    else if (*(i-2) != 0){
+                *next = 1;
+		*(next-1) = *(i-1) - size;
+		*(next-2) = *(i-2);
+                
+		*(i) = (size_t)0;
+		*(i-1) = size;
+		*(i-2) = (size_t)next;
+	    }
+
+	    return  (i - header_size - size) + 1; 
 	}
-        else{
-            i = (size_t*)*(i-2);
+	else{
+	    i = next;
 	}
     }
     
@@ -175,7 +200,7 @@ int main(void) {
     size_t p;
 
     size_t task_count = 0;
-    size_t current_task = 0;
+    current_task = 0;
     
     *(PIC + VIC_INTENABLE) = PIC_TIMER01;
 
@@ -201,6 +226,12 @@ int main(void) {
         ptable[current_task].stack = startProc(&(ptable[current_task]));
 
         switch(ptable[current_task].stack[2+7]) {
+            case 0x7: /* memalloc */ 
+		/* get the size parameter from the user stack */
+		p = (size_t)(ptable[current_task].stack[2]);
+		allocateHeap(p);
+		
+		break;
             case 0x5: /* wait_pid */
                 /* This implementation waits for *any* child to exit. */
                 /* TODO: take pid as arg, and exit() will only wake this task up if the corresponding pid exits. */
@@ -256,7 +287,7 @@ int main(void) {
                     
                     /* Set return values in each process */
                     ptable[current_task].stack[2+0] = task_count;
-                    ptable[task_count].stack[3+0] = 0;
+                    ptable[task_count].stack[2+0] = 0;
                     /* There is now one more task */
                     task_count++;
                 }

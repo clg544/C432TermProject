@@ -11,7 +11,5 @@ struct block_header{
 };
 
 struct block_header *get_free_block;
-void *memalloc(size_t size, size_t current_task);
-void free(void *block);
 
 #endif  /* MALLOC_H */

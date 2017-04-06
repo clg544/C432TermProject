@@ -38,6 +38,7 @@ struct process {
 };
 
 /* Process Table that holds all processes */
+size_t current_task;
 struct process ptable[TASK_LIMIT];
 unsigned int stacks[TASK_LIMIT][STACK_SIZE]; 
 
