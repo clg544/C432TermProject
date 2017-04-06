@@ -161,29 +161,29 @@ void *allocateHeap(size_t size){
                      (unsigned int)ptable[current_task].stack || !((i-2) == 0)){
         /* If the heap is free, and our data will fit, */
         if(*i == 1 && *(i - 1) > size){
-            *i = 0;
-            *(i-1) = size;
-	    next = i - header_size - size;
-            *(i-2) = (size_t) next;
+            *i = 0;				/* Set to not free */
+            *(i-1) = size + header_size;	/* Set block size */
+	    next = i - header_size - size - 1;	/* Set new node location */
+            *(i-2) = (size_t) next;		/* Point to the new node */
 
+	    /* If we're at the end of the list */
 	    if(*(i-2) == 0){
-		/* Point to new node */
-		*(i-2) = (size_t)next;
-
-                *next = 1;
-		*(next-1) = *(i-2) - (unsigned int)ptable[current_task].stack;
-		*(next-2) = 0;
+                *next = 1;			/* New node is free */
+		*(next-1) = 0;			/* Size depends on the stack */
+		*(next-2) = 0;			/* There is no next, 0 -> end of list */
             }
+            /* Or, we found a suitable block in the middle */
 	    else if (*(i-2) != 0){
-                *next = 1;
-		*(next-1) = *(i-1) - size;
-		*(next-2) = *(i-2);
+		/* Insert a node */
+                *next = 1;			/* Node will be free */		
+		*(next-1) = *(i-2) - next;	/* Size computed by dist from next to prev next */
+		*(next-2) = *(i-2);		/* New node will point to old next node */
                 
-		*(i) = (size_t)0;
-		*(i-1) = size;
-		*(i-2) = (size_t)next;
+		*(i) = (size_t)0;		/* This node is no longer free */
+		*(i-1) = size + header_size;	/* Size detemined by the allocation */
+		*(i-2) = (size_t)next;		/* Now we point to the node we created */
 	    }
-
+            /* point to the smallest value of the allocation */
 	    return  (i - header_size - size) + 1; 
 	}
 	else{
