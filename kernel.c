@@ -46,7 +46,7 @@ void bwputs(char* s){
  */
 void first(void) {
     while(1) {
-        bwputs(str);
+        bwputs("In First...\n");
     }
 }
 void second(void) {
