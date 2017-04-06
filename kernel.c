@@ -4,6 +4,7 @@
 #include "asm.h"
 #include "param.h"
 #include "proc.h"
+#include "malloc.h"
 
 unsigned int *init_task(unsigned int* stack, void (*start)(void)) {
     stack += STACK_SIZE - 16; /* End of stack, minus what we're about to push */
@@ -105,6 +106,68 @@ void init(){
     return;
 }
 
+int free(void* mem, size_t current_task){
+    size_t *;
+
+    /* Memory bound checking */
+    if(mem < ptable[current_task].stack || mem > ptable[current_task].heap){
+	return 0;
+    }
+    
+    i = ptable[current_task].heap;
+    while(mem > i){
+         
+    
+
+}
+
+/* Add another allocation to the heap.
+ *
+ * The heap is organized with a header that malloc will iterate through until
+ * it fist a suitable chunk of memory for the program.
+ *
+ * [ isFree ]
+ * [ block size ]
+ * [ next header]
+ * [ memory]
+ * [ ... ]
+ * [ endMemory ]
+ */
+void *memalloc(size_t size, size_t current_task){
+    size_t *i;
+    header_size = 3;
+    
+    if(size <= 0) return 0;
+
+    if (ptable[current_task].heap - size - header_size) < 
+		    ptable[current_task].stack){
+        return 0;
+    }
+
+    i = ptable[current_task].heap;
+    while (size+header_size < (unsigned int)ptable[current_task].heap - (unsigned int)ptable[current_task].stack){
+        if(*i == 1 && *(i - 1) > size){
+            *i = 0;
+            *(i-1) = size;
+
+	    if (*(i-2) != 0){
+                i = i - header_size - size;
+		*(i-1) = 1
+	    *(i-2) = *i - size - header_size - 1;
+	    
+	    i = i - header_size - size;
+
+	    *(i-1) 
+	    return i + header_size + ;
+	}
+        else{
+            i = (size_t*)*(i-2);
+	}
+    }
+    
+    /* Search failed */
+    return 0;
+}
 
 
 int main(void) {
@@ -120,8 +183,12 @@ int main(void) {
     *(TIMER0 + TIMER_CONTROL) = TIMER_EN | TIMER_PERIODIC | TIMER_32BIT | TIMER_INTEN;
 
     for (i = 0; i < TASK_LIMIT; i++){
-        ptable[i].state = UNUSED;
+	ptable[i].state = UNUSED;
         ptable[i].stack = stacks[i];
+	ptable[i].heap = stacks[i] + STACK_SIZE - 1;
+	ptable[i].stack[STACK_SIZE-1] = 1; /* heap node is free */
+	ptable[i].stack[STACK_SIZE-2] = ptable[i].heap - ptable[i].stack; /* Heap size */
+	ptable[i].stack[STACK_SIZE-3] = 0; /* There are no other heap headers */  
     }
 
     bwputs("Starting...\n");

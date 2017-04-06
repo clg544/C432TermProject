@@ -14,3 +14,4 @@ int get_pid(void);
 int get_parent_pid(void);
 int end(void);
 int wait_pid(void);
+int print(char*);

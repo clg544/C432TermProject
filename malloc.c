@@ -1,3 +1,6 @@
+#include "malloc.h"
+
+struct block_header *head, *tail;
 
 /* The purpose of this struct is to save the metadata about each block of memory */
 struct block_header{
@@ -8,7 +11,8 @@ struct block_header{
 
 };
 
-/* This function tries to find the memory address of the free space in heap which was caused by previous free() call. */
+/* This function tries to find the memory address of the free space in heap 
+ * which was caused by previous free() call. */
 struct block_header *get_free_block(size_t size)
 {
 	struct block_header *current = head;
@@ -23,17 +27,15 @@ struct block_header *get_free_block(size_t size)
 	return NULL;
 }
 
-struct block_header *head, *tail;
-
 /* malloc implementation */
-void *malloc(size_t size)
+void *memalloc(size_t size)
 {
 	size_t total_size;
 	void *block;
 	struct block_header *header;
 
-	if (!size) 
-		return NULL;
+	if (size < 1) 
+		return -1;
 
 	header = get_free_block(size);
 

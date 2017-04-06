@@ -1,6 +1,7 @@
-CC=arm-linux-gnueabi-gcc
+CROSS_COMPILE = /usr/local/gcc-linaro-6.2.1-2016.11-x86_64_arm-linux-gnueabi/bin/arm-linux-gnueabi-
+CC=$(CROSS_COMPILE)gcc
 CFLAGS=-ansi -Wall -Werror -Wextra -march=armv6 -msoft-float -fPIC -mapcs-frame -marm -g
-LD=arm-linux-gnueabi-ld
+LD=$(CROSS_COMPILE)ld
 LDFLAGS=-N -Ttext=0x10000
 
 kernel.o:

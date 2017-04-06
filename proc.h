@@ -34,6 +34,7 @@ struct process {
   unsigned int parentPid;
   unsigned int wait_pid;
   unsigned int *stack;   
+  unsigned int *heap;
 };
 
 /* Process Table that holds all processes */
