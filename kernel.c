@@ -176,7 +176,8 @@ void *allocateHeap(size_t size){
 	    else if (*(i-2) != 0){
 		/* Insert a node */
                 *next = 1;			/* Node will be free */		
-		*(next-1) = *(i-2) - next;	/* Size computed by dist from next to prev next */
+		*(next-1) = ((size_t*)(i-2)) - next; 
+						/* Size is dist from next to prev next */
 		*(next-2) = *(i-2);		/* New node will point to old next node */
                 
 		*(i) = (size_t)0;		/* This node is no longer free */
