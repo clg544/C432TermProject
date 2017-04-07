@@ -4,6 +4,7 @@
 #define PROC_H 
 
 enum procstate { SLEEPING, RUNNING, RUNNABLE, EXITED, UNUSED };
+enum schedulePriority { HIGH, MEDIUM, LOW };
 
 /* Struct that holds a snapshot of the process. */
 struct context { /*{r0,r1,r2,r3,r4,r5,r6,r7,r8,r9,r10,fp,ip,lr}*/
@@ -35,6 +36,8 @@ struct process {
   unsigned int wait_pid;
   unsigned int *stack;   
   unsigned int *heap;
+  enum schedulePriority priority;
+>>>>>>> proc.h
 };
 
 /* Process Table that holds all processes */

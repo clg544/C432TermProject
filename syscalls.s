@@ -2,11 +2,11 @@
 
 .global syscall
 syscall:
-	push {r7}
-	mov r7, #0x0
-	svc 0
-	pop {r7}
-	bx lr
+	push {r7}       /* Save r7, we need to use it... */
+	mov r7, #0x0    /* Put the Syscall code on r7 */
+	svc 0           /* Signal a software interrupt to return to kernel */ 
+	pop {r7}        /* kernel will put us back at this point, so reset r7 */
+	bx lr           /* Back to our program */
 
 .global fork
 fork:
@@ -55,11 +55,3 @@ print:
 	svc 0
 	pop {r7}
 	bx lr
-
-.global memalloc
-memalloc:
-        push {r7}
-        mov r7, #0x7
-        svc 0
-        pop {r7}
-        bx lr

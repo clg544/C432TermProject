@@ -8,17 +8,18 @@ kernel.o:
 	$(CC) $(CFLAGS) -c -o kernel.o kernel.c
 
 .SUFFIXES: .o .elf
-.o.elf:	
+.o.elf: 
 	$(LD) $(LDFLAGS) -o $@ $^
 
 .SUFFIXES: .s .o
 .s.o:
 	$(CC) $(CFLAGS) -o $@ -c $^
 
-kernel.elf: bootstrap.o context_switch.o syscalls.o kernel.o 
+kernel.elf: bootstrap.o context_switch.o syscalls.o kernel.o
 	$(LD) $(LDFLAGS) -o kernel.elf *.o
 
 make clean:
 	rm *.o 
 	rm kernel.elf
+
 

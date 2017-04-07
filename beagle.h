@@ -1,0 +1,1 @@
+/* Definition of variables that relate to the Beaglebone Black */
