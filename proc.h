@@ -34,11 +34,14 @@ struct process {
   unsigned int pid;
   unsigned int parentPid;
   unsigned int wait_pid;
-  unsigned int *stack;  
+  unsigned int *stack;   
+  unsigned int *heap;
   enum schedulePriority priority;
+>>>>>>> proc.h
 };
 
 /* Process Table that holds all processes */
+size_t current_task;
 struct process ptable[TASK_LIMIT];
 unsigned int stacks[TASK_LIMIT][STACK_SIZE]; 
 
