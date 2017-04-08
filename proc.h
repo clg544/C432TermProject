@@ -37,7 +37,6 @@ struct process {
   unsigned int *stack;   
   unsigned int *heap;
   enum schedulePriority priority;
->>>>>>> proc.h
 };
 
 /* Process Table that holds all processes */
