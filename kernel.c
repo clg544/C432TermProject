@@ -255,7 +255,6 @@ int main(void) {
 		         * (currently the only way to sleep) */
                 /* TODO: Only wake it up if it is waiting for *this* pid to exit. */
                 if(ptable[ptable[current_task].parentPid].state == SLEEPING){ 
-		            /* && parent.wait_pid == current_task */
                     ptable[ptable[current_task].parentPid].state = RUNNABLE;
                 }
                 /* Re-assign orphaned children to their grandparent. */

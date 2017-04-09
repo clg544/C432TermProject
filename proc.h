@@ -11,7 +11,6 @@ struct process {
   enum procstate state;
   unsigned int pid;
   unsigned int parentPid;
-  unsigned int wait_pid;
   unsigned int *stack;   
   unsigned int *heap;
   enum schedulePriority priority;
